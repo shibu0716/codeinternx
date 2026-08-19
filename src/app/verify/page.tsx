@@ -44,13 +44,12 @@ export default function VerifyPage({ searchParams }: { searchParams: { id?: stri
             <p className="text-slate-500">The Credential ID is located at the bottom of the certificate.</p>
           </div>
           
-          <form className="flex flex-col sm:flex-row gap-4">
+          <form action={async (formData) => { "use server"; const { redirect } = await import('next/navigation'); redirect(`/verify/${formData.get('id')}`); }} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input 
                 name="id" 
-                placeholder="e.g. SKF-9823-XYZ" 
-                defaultValue={certId || ""}
+                placeholder="e.g. CIX-2026-000001" 
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 text-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
                 required
               />
@@ -60,76 +59,6 @@ export default function VerifyPage({ searchParams }: { searchParams: { id?: stri
             </Button>
           </form>
         </div>
-
-        {hasSearched && (
-          <div className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-forwards">
-            {isVerified ? (
-              <div className="bg-white border border-emerald-200 rounded-3xl shadow-lg shadow-emerald-100/50 overflow-hidden">
-                <div className="bg-emerald-500 h-2 w-full" />
-                <div className="p-8 md:p-10 bg-emerald-50/30 border-b border-emerald-100">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-7 h-7 text-emerald-600" />
-                    </div>
-                    <h2 className="text-3xl font-bold text-emerald-900 tracking-tight">Verified Authentic</h2>
-                  </div>
-                  <p className="text-emerald-700/80 ml-16 text-lg">
-                    This credential was issued by CodeInternX and has not been revoked.
-                  </p>
-                </div>
-                
-                <div className="p-8 md:p-10">
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10">
-                    <div>
-                      <dt className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Recipient Name</dt>
-                      <dd className="text-xl font-bold text-slate-900">Alex Student</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Program Completed</dt>
-                      <dd className="text-xl font-bold text-slate-900">Full Stack Engineering</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Issue Date</dt>
-                      <dd className="text-lg font-medium text-slate-700">August 10, 2026</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Credential ID</dt>
-                      <dd className="text-lg font-mono font-medium text-slate-700 bg-slate-100 px-3 py-1 rounded-md inline-block">{certId}</dd>
-                    </div>
-                    
-                    <div className="sm:col-span-2 border-t border-slate-100 pt-8 mt-2">
-                      <dt className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Performance Summary</dt>
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <p className="font-semibold text-slate-900 text-lg">Overall Evaluation Score</p>
-                          <p className="text-sm text-slate-500">Graded by senior engineers based on code quality and architecture.</p>
-                        </div>
-                        <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200 text-base py-2 px-4 rounded-xl shrink-0">
-                          92/100 (Top 5%)
-                        </Badge>
-                      </div>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white border border-red-200 rounded-3xl shadow-lg shadow-red-100/50 overflow-hidden">
-                <div className="bg-red-500 h-2 w-full" />
-                <div className="p-8 md:p-10 bg-red-50/50">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                      <XCircle className="w-7 h-7 text-red-600" />
-                    </div>
-                    <h2 className="text-3xl font-bold text-red-900 tracking-tight">Record Not Found</h2>
-                  </div>
-                  <p className="text-red-700/80 ml-16 text-lg">
-                    We could not find a valid credential matching ID <span className="font-mono bg-red-100 px-2 py-0.5 rounded">{certId}</span>. Please check for typos and try again.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

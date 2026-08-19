@@ -38,6 +38,9 @@ export function ApplicationsClient({ applications: initialApplications }: { appl
       case 'APPROVED': return <Badge variant="outline" className="bg-green-100 text-green-800">APPROVED</Badge>;
       case 'PAYMENT_PENDING': return <Badge variant="outline" className="bg-blue-100 text-blue-800">WAITING PAYMENT</Badge>;
       case 'PAID': return <Badge variant="outline" className="bg-emerald-100 text-emerald-800">PAID</Badge>;
+      case 'ENROLLED': 
+      case 'IN_PROGRESS': return <Badge variant="outline" className="bg-purple-100 text-purple-800">IN PROGRESS</Badge>;
+      case 'COMPLETED': return <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300"><CheckCircle2 className="w-3 h-3 mr-1"/>COMPLETED</Badge>;
       case 'REJECTED': return <Badge variant="outline" className="bg-red-100 text-red-800">REJECTED</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
@@ -117,6 +120,19 @@ export function ApplicationsClient({ applications: initialApplications }: { appl
                     >
                       {loading === app.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                       Issue Offer Letter
+                    </Button>
+                  </div>
+                ) : app.status === 'ENROLLED' || app.status === 'IN_PROGRESS' ? (
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                      onClick={() => handleUpdateStatus(app.id, 'COMPLETED')}
+                      disabled={loading === app.id}
+                    >
+                      {loading === app.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                      Mark Completed
                     </Button>
                   </div>
                 ) : (

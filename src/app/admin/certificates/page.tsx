@@ -6,6 +6,7 @@ import { Download, ExternalLink, Award } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
 import { IssueCertificateModal } from "./IssueCertificateModal";
+import { BulkGenerateCertificatesButton } from "./BulkGenerateCertificatesButton";
 
 export const metadata = {
   title: "Manage Certificates | CodeInternX Admin",
@@ -38,7 +39,8 @@ export default async function AdminCertificatesPage() {
         profiles ( full_name, email ),
         programs ( title )
       `)
-      // Fetch enrollments that don't have a certificate yet
+      .eq("is_completed", true)
+      // Fetch enrollments that are completed but don't have a certificate yet
   ]);
 
   // Filter out enrollments that already have a certificate
@@ -66,7 +68,10 @@ export default async function AdminCertificatesPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Manage Certificates</h1>
           <p className="text-muted-foreground mt-1">View and issue completion certificates to students.</p>
         </div>
-        <IssueCertificateModal enrollments={eligibleEnrollments as any[]} />
+        <div className="flex items-center gap-2">
+          <BulkGenerateCertificatesButton eligibleEnrollments={eligibleEnrollments as any[]} />
+          <IssueCertificateModal enrollments={eligibleEnrollments as any[]} />
+        </div>
       </div>
 
       <Card>

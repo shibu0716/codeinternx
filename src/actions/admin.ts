@@ -78,7 +78,15 @@ export async function issueCertificate(studentId: string, programId: string, enr
   }
 
   // Generate unique certificate ID
-  const certId = `CI-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  const year = new Date().getFullYear();
+  const { count } = await supabase
+    .from("certificates")
+    .select("*", { count: 'exact', head: true })
+    .ilike('certificate_id', `CIX-${year}-%`);
+    
+  const nextNum = (count || 0) + 1;
+  const paddedNum = nextNum.toString().padStart(6, '0');
+  let certId = `CIX-${year}-${paddedNum}`;
 
   // 2. Insert Certificate
   const { error } = await supabase
@@ -106,6 +114,68 @@ export async function issueCertificate(studentId: string, programId: string, enr
 
   revalidatePath("/admin/certificates");
   return { success: true, certificateId: certId };
+}
+
+export async function bulkIssueCertificates(enrollmentsToIssue: { studentId: string, programId: string, enrollmentId: string }[]) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const year = new Date().getFullYear();
+  let generated = 0;
+  let failed = 0;
+
+  for (const enrollment of enrollmentsToIssue) {
+    try {
+      // Re-check count to ensure sequence
+      const { count } = await supabase
+        .from("certificates")
+        .select("*", { count: 'exact', head: true })
+        .ilike('certificate_id', `CIX-${year}-%`);
+        
+      let nextNum = (count || 0) + 1;
+      let success = false;
+      let retryCount = 0;
+
+      while (!success && retryCount < 5) {
+        const paddedNum = nextNum.toString().padStart(6, '0');
+        const certId = `CIX-${year}-${paddedNum}`;
+
+        const { error } = await supabase.from("certificates").insert({
+          certificate_id: certId,
+          student_id: enrollment.studentId,
+          program_id: enrollment.programId,
+          enrollment_id: enrollment.enrollmentId,
+          issue_date: new Date().toISOString()
+        });
+
+        if (error && error.code === '23505') {
+          if (error.message.includes('enrollment_id')) {
+            throw new Error("Already issued");
+          }
+          nextNum++;
+          retryCount++;
+        } else if (error) {
+          throw error;
+        } else {
+          success = true;
+        }
+      }
+
+      if (success) generated++;
+      else failed++;
+    } catch (e) {
+      failed++;
+    }
+  }
+
+  revalidatePath("/admin/certificates");
+  return { success: true, generated, failed };
 }
 
 export async function initiateRefund(paymentId: string) {
