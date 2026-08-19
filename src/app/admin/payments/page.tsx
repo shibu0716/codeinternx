@@ -5,14 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Search, CreditCard, Download, ExternalLink, IndianRupee } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-
-export const metadata = {
-  title: "Payments & Enrollments | Admin",
-};
-
-import { createClient } from "@/utils/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee } from "lucide-react";
 import { PaymentsTableClient } from "./PaymentsTableClient";
 
 export const metadata = {

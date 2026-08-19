@@ -9,8 +9,8 @@ import { updateUserRole } from "@/actions/admin";
 export function UserRoleClient({ userId, currentRole }: { userId: string, currentRole: string }) {
   const [loading, setLoading] = useState(false);
 
-  const handleRoleChange = async (newRole: string) => {
-    if (newRole === currentRole) return;
+  const handleRoleChange = async (newRole: string | null) => {
+    if (!newRole || newRole === currentRole) return;
     
     if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
 

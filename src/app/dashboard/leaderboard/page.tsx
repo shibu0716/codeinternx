@@ -43,7 +43,7 @@ export default async function LeaderboardPage() {
     .select("student_id, profiles(full_name, avatar_url)")
     .eq("program_id", enrollment.program_id);
 
-  const students = peerEnrollments || [];
+  const students: any[] = peerEnrollments || [];
   const studentIds = students.map((s) => s.student_id);
 
   // 2. Get all evaluations for these students
@@ -56,7 +56,7 @@ export default async function LeaderboardPage() {
 
   // 3. Aggregate scores
   const leaderboardStats = students.map((s) => {
-    const studentEvals = evals.filter(e => e.submissions?.student_id === s.student_id);
+    const studentEvals = evals.filter(e => (e.submissions as any)?.student_id === s.student_id);
     const completedTasks = studentEvals.length;
     const avgScore = completedTasks > 0 
       ? Math.round(studentEvals.reduce((acc, curr) => acc + curr.overall_score, 0) / completedTasks) 
@@ -83,7 +83,7 @@ export default async function LeaderboardPage() {
     <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Program Leaderboard</h1>
-        <p className="text-muted-foreground mt-1">See how you rank against peers in {enrollment.programs?.title}.</p>
+        <p className="text-muted-foreground mt-1">See how you rank against peers in {(enrollment.programs as any)?.title}.</p>
       </div>
 
       <Card>

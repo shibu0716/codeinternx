@@ -86,8 +86,8 @@ export default async function EvaluatorQueuePage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" asChild>
-                            <Link href={`/evaluator/review/${sub.id}`}>Review</Link>
+                          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" render={<Link href={`/evaluator/review/${sub.id}`} />}>
+                            Review
                           </Button>
                         </TableCell>
                       </TableRow>

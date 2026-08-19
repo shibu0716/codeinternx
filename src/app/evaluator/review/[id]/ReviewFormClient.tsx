@@ -49,7 +49,7 @@ export function ReviewFormClient({ submissionId, existingEval }: { submissionId:
           defaultValue={[score]} 
           max={100} 
           step={1} 
-          onValueChange={(vals) => setScore(vals[0])}
+          onValueChange={(vals) => setScore(Array.isArray(vals) ? vals[0] : (vals as number))}
           className="py-4"
         />
         <div className="flex justify-between text-xs text-slate-500">
@@ -62,7 +62,7 @@ export function ReviewFormClient({ submissionId, existingEval }: { submissionId:
       {/* Decision */}
       <div className="space-y-3">
         <Label className="text-base font-semibold">Final Decision</Label>
-        <Select value={status} onValueChange={setStatus} required>
+        <Select value={status} onValueChange={(val) => { if (val) setStatus(val); }} required>
           <SelectTrigger className={`border-2 ${status === 'APPROVED' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
             <SelectValue placeholder="Select Decision" />
           </SelectTrigger>

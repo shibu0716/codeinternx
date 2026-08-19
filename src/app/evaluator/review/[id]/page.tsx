@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ExternalLink, Github, Globe } from "lucide-react";
+import { ArrowLeft, ExternalLink, Globe } from "lucide-react";
 import Link from "next/link";
 import { ReviewFormClient } from "./ReviewFormClient";
 
@@ -76,20 +76,17 @@ export default async function GradeSubmissionPage({ params }: { params: { id: st
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 {submission.github_url ? (
-                  <Button asChild className="flex-1 bg-slate-900 hover:bg-slate-800">
-                    <a href={submission.github_url} target="_blank" rel="noopener noreferrer">
-                      <Github className="w-4 h-4 mr-2" /> View Source Code <ExternalLink className="w-3 h-3 ml-2 opacity-50" />
-                    </a>
+                  <Button variant="outline" className="flex-1" render={<a href={submission.github_url} target="_blank" rel="noopener noreferrer" />}>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    GitHub Repository
                   </Button>
                 ) : (
                   <Button disabled variant="outline" className="flex-1">No GitHub Link</Button>
                 )}
                 
                 {submission.live_url ? (
-                  <Button asChild variant="outline" className="flex-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                    <a href={submission.live_url} target="_blank" rel="noopener noreferrer">
-                      <Globe className="w-4 h-4 mr-2" /> View Live Deploy <ExternalLink className="w-3 h-3 ml-2 opacity-50" />
-                    </a>
+                  <Button variant="outline" className="flex-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50" render={<a href={submission.live_url} target="_blank" rel="noopener noreferrer" />}>
+                    <Globe className="w-4 h-4 mr-2" /> View Live Deploy <ExternalLink className="w-3 h-3 ml-2 opacity-50" />
                   </Button>
                 ) : (
                   <Button disabled variant="outline" className="flex-1">No Live Deploy Link</Button>

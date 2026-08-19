@@ -21,7 +21,7 @@ export default async function AuditLogsPage() {
       type: "Application",
       icon: FileText,
       color: "text-blue-500 bg-blue-50",
-      title: `${a.profiles?.full_name} submitted an application`,
+      title: `${(a.profiles as any)?.full_name} submitted an application`,
       description: `Application ID: ${a.application_id} | Status: ${a.status}`,
       time: new Date(a.created_at),
       href: "/admin/applications"
@@ -30,7 +30,7 @@ export default async function AuditLogsPage() {
       type: "Order",
       icon: CreditCard,
       color: "text-emerald-500 bg-emerald-50",
-      title: `${o.profiles?.full_name} initiated an order`,
+      title: `${(o.profiles as any)?.full_name} initiated an order`,
       description: `Amount: ₹${o.amount} | Status: ${o.status}`,
       time: new Date(o.created_at),
       href: "/admin/orders"
@@ -39,8 +39,8 @@ export default async function AuditLogsPage() {
       type: "Certificate",
       icon: Award,
       color: "text-purple-500 bg-purple-50",
-      title: `${c.profiles?.full_name} was issued a certificate`,
-      description: `Program: ${c.programs?.title} | Cert ID: ${c.certificate_id}`,
+      title: `${(c.profiles as any)?.full_name} was issued a certificate`,
+      description: `Program: ${(c.programs as any)?.title} | Cert ID: ${c.certificate_id}`,
       time: new Date(c.issue_date),
       href: "/admin/certificates"
     }))

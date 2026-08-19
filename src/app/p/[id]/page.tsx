@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Award, Code2, Github, Linkedin, CheckCircle2, User, BookOpen } from "lucide-react";
+import { Award, Code2, CheckCircle2, User, BookOpen, Link as LinkIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -87,12 +87,12 @@ export default async function PublicProfilePage({ params }: { params: { id: stri
                   <div className="flex gap-3 mt-6">
                     {profile.github_url && (
                       <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 transition-colors">
-                        <Github className="w-5 h-5" />
+                        <LinkIcon className="w-5 h-5" />
                       </a>
                     )}
                     {profile.linkedin_url && (
                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 transition-colors">
-                        <Linkedin className="w-5 h-5" />
+                        <LinkIcon className="w-5 h-5" />
                       </a>
                     )}
                   </div>

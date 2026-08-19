@@ -53,7 +53,7 @@ export function ProgramForm({ initialData = null }: { initialData?: any }) {
         ...formData,
         price: Number(formData.price),
         duration_weeks: Number(formData.duration_weeks),
-        technologies: formData.technologies.split(",").map(t => t.trim()).filter(Boolean)
+        technologies: formData.technologies.split(",").map((t: string) => t.trim()).filter(Boolean)
       };
 
       await saveProgram(payload, initialData?.id);

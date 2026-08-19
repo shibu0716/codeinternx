@@ -47,11 +47,9 @@ export function IssueCertificateModal({ enrollments }: { enrollments: Enrollment
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <div className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2">
-          <Award className="w-4 h-4 mr-2" />
-          Issue New Certificate
-        </div>
+      <DialogTrigger render={<Button className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white" />}>
+        <Award className="w-4 h-4 mr-2" />
+        Issue New Certificate
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -63,20 +61,16 @@ export function IssueCertificateModal({ enrollments }: { enrollments: Enrollment
         <div className="space-y-6 py-4">
           <div className="space-y-2">
             <Label>Select Enrolled Student</Label>
-            <Select value={selectedId} onValueChange={(val) => { if (val) setSelectedId(val); }}>
+            <Select disabled={enrollments.length === 0} value={selectedId} onValueChange={(val) => { if (val) setSelectedId(val); }}>
               <SelectTrigger>
-                <SelectValue placeholder="Select student & program..." />
+                <SelectValue placeholder={enrollments.length === 0 ? "No eligible enrollments found" : "Select student & program..."} />
               </SelectTrigger>
               <SelectContent>
-                {enrollments.length === 0 ? (
-                  <div className="p-2 text-sm text-slate-500">No eligible enrollments found.</div>
-                ) : (
-                  enrollments.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.profiles?.full_name} - {e.programs?.title}
-                    </SelectItem>
-                  ))
-                )}
+                {enrollments.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {e.profiles?.full_name} - {e.programs?.title}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-slate-500 mt-2">

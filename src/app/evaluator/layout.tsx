@@ -87,11 +87,9 @@ export default async function EvaluatorLayout({ children }: { children: ReactNod
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex h-16 items-center gap-4 border-b bg-white px-4 md:hidden shrink-0">
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
               <SidebarContent />

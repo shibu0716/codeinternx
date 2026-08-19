@@ -95,8 +95,8 @@ export default async function EvaluatorDashboardPage() {
             <div className="text-2xl font-bold">{pendingCount! > 0 ? "Yes" : "No"}</div>
             <p className="text-xs text-indigo-200 mt-1">Check the queue</p>
             {pendingCount! > 0 && (
-              <Button size="sm" variant="secondary" className="w-full mt-3 bg-white text-indigo-600 hover:bg-indigo-50" asChild>
-                <Link href="/evaluator/queue">Start Grading</Link>
+              <Button size="sm" variant="secondary" className="w-full mt-3 bg-white text-indigo-600 hover:bg-indigo-50" render={<Link href="/evaluator/queue" />}>
+                Start Grading
               </Button>
             )}
           </CardContent>
@@ -128,8 +128,8 @@ export default async function EvaluatorDashboardPage() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="outline" asChild>
-                      <Link href={`/evaluator/review/${sub.id}`}>Review Task</Link>
+                    <Button variant="outline" render={<Link href={`/evaluator/review/${sub.id}`} />}>
+                      Review Task
                     </Button>
                   </div>
                 );

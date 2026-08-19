@@ -73,10 +73,10 @@ export default async function AdminOrdersPage() {
                         <div className="text-xs text-muted-foreground mt-1 font-mono">{order.razorpay_order_id}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium">{order.profiles?.full_name}</div>
-                        <div className="text-xs text-muted-foreground">{order.profiles?.email}</div>
+                        <div className="font-medium">{(order.profiles as any)?.full_name}</div>
+                        <div className="text-xs text-muted-foreground">{(order.profiles as any)?.email}</div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{order.programs?.title}</td>
+                      <td className="px-4 py-3 text-slate-600">{(order.programs as any)?.title}</td>
                       <td className="px-4 py-3 font-semibold">
                         <span className="flex items-center text-slate-900">
                           <IndianRupee className="w-3 h-3 mr-1" />

@@ -48,11 +48,9 @@ export function ImportApplicationsModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white">
-          <Upload className="w-4 h-4 mr-2" />
-          Import CSV
-        </Button>
+      <DialogTrigger render={<Button variant="outline" className="bg-white" />}>
+        <Upload className="w-4 h-4 mr-2" />
+        Import CSV
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
