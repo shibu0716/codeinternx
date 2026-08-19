@@ -186,6 +186,25 @@ export function PaymentCheckoutClient({ application, userEmail, userName }: Paym
               {loading ? "Initializing..." : `Pay ₹${currentPrice} Securely`}
             </Button>
 
+            <div className="relative pt-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">Or pay directly via UPI</span>
+              </div>
+            </div>
+
+            <div className="text-center p-4 bg-slate-50 border border-slate-200 rounded-lg">
+              <p className="text-sm font-medium text-slate-700 mb-2">Manual UPI Transfer</p>
+              <div className="bg-white border border-slate-200 rounded-md p-3 flex items-center justify-center">
+                <span className="font-mono text-base font-bold text-slate-900 select-all">shibuthegenius@ybl</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                After paying, please share the payment screenshot with our support team to activate your enrollment manually.
+              </p>
+            </div>
+
             <div className="text-center text-xs text-muted-foreground space-y-2 mt-4">
               <p>Secure payment powered by Razorpay.</p>
               <p>By continuing, you agree to our <a href="#" className="underline">Terms & Conditions</a> and <a href="#" className="underline">Refund Policy</a>.</p>
