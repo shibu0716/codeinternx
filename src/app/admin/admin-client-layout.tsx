@@ -34,7 +34,6 @@ const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { title: "Applications", href: "/admin/applications", icon: FileText },
   { title: "Students", href: "/admin/students", icon: Users },
-  { title: "Internships", href: "/admin/internships", icon: Briefcase },
   { title: "Programs", href: "/admin/programs", icon: BookOpen },
   { title: "Payments", href: "/admin/payments", icon: CreditCard },
   { title: "Orders", href: "/admin/orders", icon: ShoppingCart },
@@ -42,16 +41,13 @@ const adminNavItems = [
   { title: "Submissions", href: "/admin/submissions", icon: ClipboardList },
   { title: "Evaluations", href: "/admin/evaluations", icon: CheckSquare },
   { title: "Certificates", href: "/admin/certificates", icon: Award },
-  { title: "Verification", href: "/admin/verification", icon: ShieldCheck },
+  { title: "Verification", href: "/verify", icon: ShieldCheck },
   { title: "Notifications", href: "/admin/notifications", icon: Bell },
   { title: "Content", href: "/admin/content", icon: LayoutTemplate },
   { title: "Analytics", href: "/admin/analytics", icon: BarChart },
   { title: "Reports", href: "/admin/reports", icon: FileBarChart },
   { title: "Users", href: "/admin/users", icon: Users },
-  { title: "Admins", href: "/admin/admins", icon: UserCog },
   { title: "Audit Logs", href: "/admin/audit-logs", icon: ShieldAlert },
-  { title: "Settings", href: "/admin/settings", icon: Settings },
-  { title: "System", href: "/admin/system", icon: Server },
 ];
 
 const SidebarContent = ({ pathname }: { pathname: string }) => (
