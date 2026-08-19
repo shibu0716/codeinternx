@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { createClient } from "@/utils/supabase/server";
+import { RateLimiter } from "@/lib/rate-limiter";
+
+// 5 requests per minute per IP to prevent API spam
+const limiter = new RateLimiter(60 * 1000, 5);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "test_key",
@@ -9,6 +13,13 @@ const razorpay = new Razorpay({
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rateLimit = limiter.check(ip);
+    
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

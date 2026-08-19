@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { RateLimiter } from "@/lib/rate-limiter";
+
+// 3 requests per minute per IP
+const limiter = new RateLimiter(60 * 1000, 3);
 
 export async function POST(req: Request) {
   try {
+    // Basic IP tracking for rate limiting (fallback to 'unknown' if running locally without headers)
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rateLimit = limiter.check(ip);
+    
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: "Too many requests. Please wait a minute before trying again." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

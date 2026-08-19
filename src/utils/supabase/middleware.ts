@@ -27,8 +27,33 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // refreshing the auth token
-  await supabase.auth.getUser()
+  // refreshing the auth token and checking session
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Protect /dashboard and /admin routes
+  const protectedRoutes = ['/dashboard', '/admin']
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  )
+
+  if (isProtectedRoute && !user) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    loginUrl.searchParams.set('message', 'Please log in to access this page')
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Prevent logged-in users from seeing login/signup pages
+  const authRoutes = ['/login', '/signup', '/forgot-password']
+  const isAuthRoute = authRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
+  
+  if (isAuthRoute && user) {
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    return NextResponse.redirect(dashboardUrl)
+  }
 
   return supabaseResponse
 }

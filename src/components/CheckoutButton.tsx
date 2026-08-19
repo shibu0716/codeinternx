@@ -67,7 +67,7 @@ export function CheckoutButton({ programId, price, duration, userEmail, userPhon
         currency: orderData.currency,
         name: "CodeInternX",
         description: "Internship Enrollment Fee",
-        image: "https://codeinternx.example.com/codeinternx-logo.png",
+        image: "https://codeinternx.com/codeinternx-logo.png",
         order_id: orderData.id,
         handler: async function (response: any) {
           // 4. Verify Payment Signature on Backend
