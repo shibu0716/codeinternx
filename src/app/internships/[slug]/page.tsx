@@ -155,7 +155,7 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
                   Execution Roadmap
                 </h2>
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-2">
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion className="w-full">
                     {internship.curriculum.map((item, index) => (
                       <AccordionItem key={item.week} value={`week-${item.week}`} className="border-b-slate-100 last:border-0 px-4">
                         <AccordionTrigger className="text-lg font-semibold hover:no-underline py-6">
