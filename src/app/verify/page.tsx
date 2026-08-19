@@ -1,20 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Search, CheckCircle2, XCircle, LockKeyhole } from "lucide-react";
+import { Search, LockKeyhole } from "lucide-react";
 
 export const metadata = {
   title: "Verify Certificate | CodeInternX",
   description: "Verify the authenticity of a CodeInternX certificate.",
 };
 
-export default function VerifyPage({ searchParams }: { searchParams: { id?: string } }) {
-  // In a real app, we would fetch the certificate data based on the ID.
-  // For UI demonstration, we'll mock the state based on the presence of an ID.
-  const certId = searchParams.id;
-  const isVerified = certId === "SKF-9823-XYZ";
-  const hasSearched = !!certId;
+export default function VerifyPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30 pb-20">
@@ -32,7 +25,7 @@ export default function VerifyPage({ searchParams }: { searchParams: { id?: stri
             Credential <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Verification</span>
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            CodeInternX certificates are cryptographically secure. Enter a credential ID below to instantly verify its authenticity and view the candidate's performance report.
+            CodeInternX certificates are cryptographically secure. Enter a credential ID below to instantly verify its authenticity and view the candidate&apos;s performance report.
           </p>
         </div>
       </div>
