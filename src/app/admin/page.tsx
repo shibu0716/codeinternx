@@ -23,7 +23,7 @@ export default async function AdminPage() {
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "STUDENT"),
     supabase.from("programs").select("*", { count: "exact", head: true }).eq("is_published", true),
     supabase.from("submissions").select("*", { count: "exact", head: true }).eq("status", "PENDING"),
-    supabase.from("orders").select("amount").eq("status", "PAID"),
+    supabase.from("orders").select("amount, created_at").eq("status", "PAID"),
     supabase.from("submissions")
       .select(`
         id,
@@ -45,14 +45,32 @@ export default async function AdminPage() {
       .limit(5)
   ]);
 
-  const totalRevenue = ordersData?.reduce((sum, order) => sum + Number(order.amount), 0) || 0;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const thisWeek = new Date(today);
+  thisWeek.setDate(today.getDate() - today.getDay());
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // Format currency
-  const formattedRevenue = new Intl.NumberFormat("en-IN", {
+  let totalRevenue = 0;
+  let todayRevenue = 0;
+  let weekRevenue = 0;
+  let monthRevenue = 0;
+
+  ordersData?.forEach(order => {
+    const amount = Number(order.amount);
+    totalRevenue += amount;
+    
+    const orderDate = new Date(order.created_at);
+    if (orderDate >= today) todayRevenue += amount;
+    if (orderDate >= thisWeek) weekRevenue += amount;
+    if (orderDate >= thisMonth) monthRevenue += amount;
+  });
+
+  const formatCurrency = (val: number) => new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 0,
-  }).format(totalRevenue);
+  }).format(val);
 
   // Helper to format relative time
   const getRelativeTime = (dateString: string) => {
@@ -107,8 +125,35 @@ export default async function AdminPage() {
             <TrendingUp className="w-4 h-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formattedRevenue}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
             <p className="text-xs text-muted-foreground mt-1">From successful orders</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-500">Today's Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{formatCurrency(todayRevenue)}</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-500">This Week's Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{formatCurrency(weekRevenue)}</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-500">This Month's Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">{formatCurrency(monthRevenue)}</div>
           </CardContent>
         </Card>
       </div>
@@ -130,9 +175,9 @@ export default async function AdminPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-xs text-muted-foreground">{getRelativeTime(sub.submitted_at)}</span>
-                      <Button size="sm" variant="outline" asChild>
-                        <Link href={`/admin/evaluations/${sub.id}`}>Review</Link>
-                      </Button>
+                      <Link href={`/admin/evaluations/${sub.id}`} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 hover:text-slate-900 h-9 px-3">
+                        Review
+                      </Link>
                     </div>
                   </div>
                 ))

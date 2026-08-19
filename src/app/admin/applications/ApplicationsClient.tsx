@@ -94,6 +94,31 @@ export function ApplicationsClient({ applications: initialApplications }: { appl
                       <XCircle className="w-4 h-4" />
                     </Button>
                   </div>
+                ) : app.status === 'APPROVED' ? (
+                  <div className="flex justify-end gap-2">
+                     <Button 
+                      size="sm" 
+                      variant="default" 
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      onClick={async () => {
+                        setLoading(app.id);
+                        try {
+                          const { issueOfferLetter } = await import("@/actions/admin");
+                          await issueOfferLetter(app.id);
+                          setApps(apps.map(a => a.id === app.id ? { ...a, status: 'ENROLLED' } : a));
+                          toast.success("Offer Letter Issued (Manually Enrolled)");
+                        } catch (err: any) {
+                          toast.error(err.message || "Failed to issue offer letter");
+                        } finally {
+                          setLoading(null);
+                        }
+                      }}
+                      disabled={loading === app.id}
+                    >
+                      {loading === app.id ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      Issue Offer Letter
+                    </Button>
+                  </div>
                 ) : (
                   <span className="text-xs text-muted-foreground">No actions</span>
                 )}

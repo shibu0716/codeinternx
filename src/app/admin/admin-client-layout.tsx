@@ -11,19 +11,46 @@ import {
   LogOut,
   Menu,
   LayoutDashboard,
-  CreditCard
+  CreditCard,
+  FileText,
+  Briefcase,
+  ShoppingCart,
+  GraduationCap,
+  ClipboardList,
+  ShieldCheck,
+  Bell,
+  LayoutTemplate,
+  BarChart,
+  FileBarChart,
+  UserCog,
+  ShieldAlert,
+  Server
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const adminNavItems = [
-  { title: "Overview", href: "/admin", icon: LayoutDashboard },
+  { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { title: "Applications", href: "/admin/applications", icon: FileText },
   { title: "Students", href: "/admin/students", icon: Users },
+  { title: "Internships", href: "/admin/internships", icon: Briefcase },
   { title: "Programs", href: "/admin/programs", icon: BookOpen },
-  { title: "Evaluations", href: "/admin/evaluations", icon: CheckSquare },
   { title: "Payments", href: "/admin/payments", icon: CreditCard },
+  { title: "Orders", href: "/admin/orders", icon: ShoppingCart },
+  { title: "Enrollments", href: "/admin/enrollments", icon: GraduationCap },
+  { title: "Submissions", href: "/admin/submissions", icon: ClipboardList },
+  { title: "Evaluations", href: "/admin/evaluations", icon: CheckSquare },
   { title: "Certificates", href: "/admin/certificates", icon: Award },
+  { title: "Verification", href: "/admin/verification", icon: ShieldCheck },
+  { title: "Notifications", href: "/admin/notifications", icon: Bell },
+  { title: "Content", href: "/admin/content", icon: LayoutTemplate },
+  { title: "Analytics", href: "/admin/analytics", icon: BarChart },
+  { title: "Reports", href: "/admin/reports", icon: FileBarChart },
+  { title: "Users", href: "/admin/users", icon: Users },
+  { title: "Admins", href: "/admin/admins", icon: UserCog },
+  { title: "Audit Logs", href: "/admin/audit-logs", icon: ShieldAlert },
   { title: "Settings", href: "/admin/settings", icon: Settings },
+  { title: "System", href: "/admin/system", icon: Server },
 ];
 
 const SidebarContent = ({ pathname }: { pathname: string }) => (

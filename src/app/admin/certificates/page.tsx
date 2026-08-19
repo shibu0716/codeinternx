@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Download, ExternalLink, Award } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
+import { IssueCertificateModal } from "./IssueCertificateModal";
+
 export const metadata = {
   title: "Manage Certificates | CodeInternX Admin",
 };
@@ -12,16 +14,37 @@ export const metadata = {
 export default async function AdminCertificatesPage() {
   const supabase = await createClient();
 
-  const { data: certificates, error } = await supabase
-    .from("certificates")
-    .select(`
-      id,
-      certificate_id,
-      issue_date,
-      profiles ( full_name, email ),
-      programs ( title )
-    `)
-    .order("issue_date", { ascending: false });
+  const [
+    { data: certificates, error },
+    { data: enrollments, error: enrollError }
+  ] = await Promise.all([
+    supabase
+      .from("certificates")
+      .select(`
+        id,
+        certificate_id,
+        enrollment_id,
+        issue_date,
+        profiles ( full_name, email ),
+        programs ( title )
+      `)
+      .order("issue_date", { ascending: false }),
+    supabase
+      .from("enrollments")
+      .select(`
+        id,
+        student_id,
+        program_id,
+        profiles ( full_name, email ),
+        programs ( title )
+      `)
+      // Fetch enrollments that don't have a certificate yet
+  ]);
+
+  // Filter out enrollments that already have a certificate
+  // We do it in JS for simplicity since we don't have a complex join
+  const issuedEnrollmentIds = new Set(certificates?.map(c => c.enrollment_id) || []);
+  const eligibleEnrollments = enrollments?.filter(e => !issuedEnrollmentIds.has(e.id)) || [];
 
   if (error) {
     console.error("Error fetching certificates:", error);
@@ -43,10 +66,7 @@ export default async function AdminCertificatesPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Manage Certificates</h1>
           <p className="text-muted-foreground mt-1">View and issue completion certificates to students.</p>
         </div>
-        <Button className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white">
-          <Award className="w-4 h-4 mr-2" />
-          Issue New Certificate
-        </Button>
+        <IssueCertificateModal enrollments={eligibleEnrollments as any[]} />
       </div>
 
       <Card>

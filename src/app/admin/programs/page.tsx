@@ -99,11 +99,9 @@ export default async function AdminProgramsPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           {program.is_published && (
-                            <Button size="icon" variant="ghost" asChild title="View Public Page">
-                              <Link href={program.category === 'INTERNSHIP' ? `/internships/${program.slug}` : `/courses/${program.slug}`}>
-                                <ExternalLink className="w-4 h-4 text-slate-500" />
-                              </Link>
-                            </Button>
+                            <Link href={program.category === 'INTERNSHIP' ? `/internships/${program.slug}` : `/courses/${program.slug}`} title="View Public Page" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-slate-100 hover:text-slate-900 h-9 w-9 text-slate-500">
+                                <ExternalLink className="w-4 h-4" />
+                            </Link>
                           )}
                           <Button size="icon" variant="ghost" title="Edit Program">
                             <Edit className="w-4 h-4 text-blue-600" />

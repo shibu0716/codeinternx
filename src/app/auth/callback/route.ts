@@ -12,6 +12,18 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Admin Bootstrap Logic
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.email === adminEmail) {
+          await supabase
+            .from('profiles')
+            .update({ role: 'SUPER_ADMIN' })
+            .eq('id', user.id);
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`)
     }
   }

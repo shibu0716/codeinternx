@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { login } from "@/actions/auth";
 
+import type { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "Admin Portal | CodeInternX",
   description: "Secure login for CodeInternX administrators.",

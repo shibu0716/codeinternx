@@ -19,6 +19,18 @@ export async function login(formData: FormData) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
+  // Admin Bootstrap Logic
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (adminEmail && data.email === adminEmail) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ role: 'SUPER_ADMIN' })
+        .eq('id', user.id);
+    }
+  }
+
   const redirectUrl = formData.get("redirect") as string;
 
   // After successful login, redirect to requested url or dashboard
