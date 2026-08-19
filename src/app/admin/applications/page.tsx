@@ -1,0 +1,52 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
+import { ApplicationsClient } from "./ApplicationsClient";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+export const metadata = {
+  title: "Application Review | Admin",
+};
+
+export default async function AdminApplicationsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Fetch user role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  const { data: applications } = await supabase
+    .from("applications")
+    .select("*, profiles(full_name, email, phone), programs(title)")
+    .order("created_at", { ascending: false });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
+        <p className="text-muted-foreground mt-1">Review student applications, approve them for payment, or reject them.</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Applications</CardTitle>
+          <CardDescription>Click approve to allow a student to proceed to payment.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ApplicationsClient applications={applications || []} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

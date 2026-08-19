@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeInternX - Production-Ready Internship Platform
 
-## Getting Started
+CodeInternX is a modern, scalable web platform built to provide project-based internships, verifiable credentials, and hands-on skill development for software engineering students.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Components:** Shadcn/UI & Radix Primitives
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth (SSR)
+- **Icons:** Lucide React & Radix Icons
+
+## 📦 Deployment Instructions (Phase 14)
+
+The platform is 100% production-ready and optimized for Vercel. 
+
+### 1. Database Setup
+1. Create a new project on [Supabase](https://supabase.com).
+2. Go to the **SQL Editor** in your Supabase dashboard.
+3. Copy the contents of `supabase/schema.sql` and run it. This will create all necessary tables (profiles, programs, tasks, submissions, evaluations, certificates) and establish Row Level Security (RLS) policies.
+
+### 2. Environment Variables
+You need the following environment variables for deployment. In local development, place these in `.env.local`.
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Deploy to Vercel
+Since this is a Next.js application, Vercel is the recommended hosting provider.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Push this repository to GitHub.
+2. Log in to [Vercel](https://vercel.com) and click **Add New Project**.
+3. Import your GitHub repository.
+4. In the **Environment Variables** section, add your `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+5. Click **Deploy**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Vercel will automatically detect Next.js, run `npm run build`, and deploy your platform to a global edge network.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌟 Key Features
+- **Student Dashboard:** Track progress, submit tasks via GitHub/Live URLs.
+- **Admin Dashboard:** Evaluate submissions, issue certificates, monitor Razorpay revenue.
+- **Verified Credentials:** Public `/verify` portal for recruiters to check certificate authenticity.
+- **Student Portfolios:** Public `/portfolio/[studentId]` pages acting as verified resumes.
+- **SEO Optimized:** Dynamic OpenGraph tags, sitemaps, and an engineering blog to drive organic traffic.
