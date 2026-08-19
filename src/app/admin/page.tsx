@@ -2,12 +2,67 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, BookOpen, CheckSquare, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata = {
   title: "Admin Dashboard | CodeInternX",
 };
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const supabase = await createClient();
+
+  // Fetch metrics in parallel
+  const [
+    { count: studentsCount },
+    { count: programsCount },
+    { count: pendingEvalsCount },
+    { data: ordersData },
+    { data: recentSubmissions },
+    { data: recentEnrollments }
+  ] = await Promise.all([
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "STUDENT"),
+    supabase.from("programs").select("*", { count: "exact", head: true }).eq("is_published", true),
+    supabase.from("submissions").select("*", { count: "exact", head: true }).eq("status", "PENDING"),
+    supabase.from("orders").select("amount").eq("status", "PAID"),
+    supabase.from("submissions")
+      .select(`
+        id,
+        submitted_at,
+        profiles!inner ( full_name ),
+        tasks!inner ( title )
+      `)
+      .eq("status", "PENDING")
+      .order("submitted_at", { ascending: false })
+      .limit(5),
+    supabase.from("enrollments")
+      .select(`
+        id,
+        enrolled_at,
+        profiles!inner ( full_name ),
+        programs!inner ( title )
+      `)
+      .order("enrolled_at", { ascending: false })
+      .limit(5)
+  ]);
+
+  const totalRevenue = ordersData?.reduce((sum, order) => sum + Number(order.amount), 0) || 0;
+
+  // Format currency
+  const formattedRevenue = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(totalRevenue);
+
+  // Helper to format relative time
+  const getRelativeTime = (dateString: string) => {
+    const diff = new Date().getTime() - new Date(dateString).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours} hours ago`;
+    return `${Math.floor(hours / 24)} days ago`;
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -22,8 +77,8 @@ export default function AdminPage() {
             <Users className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,248</div>
-            <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
+            <div className="text-2xl font-bold">{studentsCount || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Registered users</p>
           </CardContent>
         </Card>
         <Card>
@@ -32,8 +87,8 @@ export default function AdminPage() {
             <BookOpen className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground mt-1">3 cohorts starting soon</p>
+            <div className="text-2xl font-bold">{programsCount || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Published courses/internships</p>
           </CardContent>
         </Card>
         <Card>
@@ -42,48 +97,53 @@ export default function AdminPage() {
             <CheckSquare className="w-4 h-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">48</div>
+            <div className="text-2xl font-bold">{pendingEvalsCount || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Requires immediate attention</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Revenue (Monthly)</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <TrendingUp className="w-4 h-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹3.2L</div>
-            <p className="text-xs text-muted-foreground mt-1">+8% from last month</p>
+            <div className="text-2xl font-bold">{formattedRevenue}</div>
+            <p className="text-xs text-muted-foreground mt-1">From successful orders</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="col-span-1">
+        <Card className="col-span-1 flex flex-col">
           <CardHeader>
             <CardTitle>Recent Submissions</CardTitle>
             <CardDescription>Submissions waiting for evaluation</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { student: "Rahul Kumar", task: "Task 3: Backend APIs", time: "2 hours ago" },
-                { student: "Priya Sharma", task: "Task 2: React Components", time: "3 hours ago" },
-                { student: "Amit Singh", task: "Final Project", time: "5 hours ago" },
-              ].map((sub, i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium text-sm">{sub.student}</p>
-                    <p className="text-xs text-muted-foreground">{sub.task}</p>
+          <CardContent className="flex-1 flex flex-col">
+            <div className="space-y-4 flex-1">
+              {recentSubmissions && recentSubmissions.length > 0 ? (
+                recentSubmissions.map((sub: any, i) => (
+                  <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <p className="font-medium text-sm">{sub.profiles?.full_name || "Unknown Student"}</p>
+                      <p className="text-xs text-muted-foreground">{sub.tasks?.title || "Unknown Task"}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-muted-foreground">{getRelativeTime(sub.submitted_at)}</span>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link href={`/admin/evaluations/${sub.id}`}>Review</Link>
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs text-muted-foreground">{sub.time}</span>
-                    <Button size="sm" variant="outline">Review</Button>
-                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                  <CheckSquare className="w-8 h-8 text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-500">No pending submissions!</p>
                 </div>
-              ))}
+              )}
             </div>
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t mt-auto">
               <Link href="/admin/evaluations" className="flex w-full">
                 <Button variant="ghost" className="w-full">
                   View All Pending
@@ -93,30 +153,36 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1">
+        <Card className="col-span-1 flex flex-col">
           <CardHeader>
             <CardTitle>Recent Enrollments</CardTitle>
             <CardDescription>Latest students who joined programs</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { student: "Neha Gupta", program: "Full Stack Development", status: "Active" },
-                { student: "Vikram Reddy", program: "Data Science & Python", status: "Active" },
-                { student: "Sanjana Patel", program: "Frontend Development", status: "Active" },
-              ].map((sub, i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium text-sm">{sub.student}</p>
-                    <p className="text-xs text-muted-foreground">{sub.program}</p>
+          <CardContent className="flex-1 flex flex-col">
+            <div className="space-y-4 flex-1">
+              {recentEnrollments && recentEnrollments.length > 0 ? (
+                recentEnrollments.map((enrollment: any, i) => (
+                  <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <p className="font-medium text-sm">{enrollment.profiles?.full_name || "Unknown Student"}</p>
+                      <p className="text-xs text-muted-foreground">{enrollment.programs?.title || "Unknown Program"}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200 uppercase">
+                        Active
+                      </span>
+                      <p className="text-[10px] text-muted-foreground mt-1">{getRelativeTime(enrollment.enrolled_at)}</p>
+                    </div>
                   </div>
-                  <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-700 border-green-200">
-                    {sub.status}
-                  </span>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                  <Users className="w-8 h-8 text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-500">No recent enrollments</p>
                 </div>
-              ))}
+              )}
             </div>
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t mt-auto">
               <Link href="/admin/students" className="flex w-full">
                 <Button variant="ghost" className="w-full">
                   Manage Students
