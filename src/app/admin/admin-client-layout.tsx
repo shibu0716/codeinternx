@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { GlobalSearch } from "./GlobalSearch";
 
 const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -115,6 +116,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarContent pathname={pathname} />
             </SheetContent>
           </Sheet>
+        </header>
+
+        {/* Desktop Header */}
+        <header className="hidden md:flex h-16 items-center justify-between border-b bg-white px-8">
+          <div className="flex-1 flex items-center">
+             <GlobalSearch />
+          </div>
+          <div className="flex items-center gap-4">
+             {/* Future User Profile or notifications */}
+             <Button variant="ghost" size="icon" className="text-slate-500 rounded-full">
+               <Bell className="w-5 h-5" />
+             </Button>
+          </div>
         </header>
 
         {/* Page Content */}

@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
+import { cookies } from "next/headers";
+import { sendAdminOTPEmail } from "@/lib/email";
+
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
@@ -19,9 +22,9 @@ export async function login(formData: FormData) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
-  // Admin Bootstrap Logic
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail && data.email === adminEmail) {
+  // Admin Bootstrap & 2FA Logic
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+  if (adminEmails.includes(data.email)) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase
@@ -29,6 +32,24 @@ export async function login(formData: FormData) {
         .update({ role: 'SUPER_ADMIN' })
         .eq('id', user.id);
     }
+    
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store OTP in an HTTP-only cookie (expires in 10 minutes)
+    const cookieStore = await cookies();
+    cookieStore.set('admin_2fa_otp', otp, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 10, // 10 minutes
+      path: '/',
+    });
+
+    // Send email to the specific admin who is logging in
+    await sendAdminOTPEmail(data.email, otp);
+    
+    // Redirect to Verification Page
+    redirect("/verify-admin");
   }
 
   const redirectUrl = formData.get("redirect") as string;
@@ -110,4 +131,27 @@ export async function updatePassword(formData: FormData) {
   }
 
   redirect("/login?message=Password updated successfully, you can now log in");
+}
+
+export async function verifyAdminOTP(formData: FormData) {
+  const code = formData.get("code") as string;
+  const cookieStore = await cookies();
+  const storedOTP = cookieStore.get('admin_2fa_otp')?.value;
+
+  if (!storedOTP || storedOTP !== code) {
+    redirect("/verify-admin?error=Invalid or expired verification code");
+  }
+
+  // Clear the OTP cookie
+  cookieStore.delete('admin_2fa_otp');
+
+  // Set the verified cookie
+  cookieStore.set('admin_2fa_verified', 'true', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24, // 24 hours
+    path: '/',
+  });
+
+  redirect("/admin");
 }

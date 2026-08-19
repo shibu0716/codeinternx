@@ -22,7 +22,7 @@ const navigation = [
     name: "Internships", 
     href: "#",
     children: [
-      { name: "Apply", href: "/internships" },
+      { name: "Apply", href: "/login" },
       { name: "Download Certificate", href: "/dashboard/certificates" },
       { name: "Download LOR", href: "/dashboard/lor" },
       { name: "Download Offer Letter", href: "/dashboard/offer-letter" },

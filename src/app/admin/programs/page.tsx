@@ -38,10 +38,10 @@ export default async function AdminProgramsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Manage Programs</h1>
           <p className="text-muted-foreground mt-1">Create, edit, and publish internships and courses.</p>
         </div>
-        <Button className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white">
+        <Link href="/admin/programs/new" className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2">
           <PlusCircle className="w-4 h-4 mr-2" />
           Create Program
-        </Button>
+        </Link>
       </div>
 
       <Card>
@@ -103,9 +103,9 @@ export default async function AdminProgramsPage() {
                                 <ExternalLink className="w-4 h-4" />
                             </Link>
                           )}
-                          <Button size="icon" variant="ghost" title="Edit Program">
+                          <Link href={`/admin/programs/${program.id}`} title="Edit Program" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-slate-100 hover:text-slate-900 h-9 w-9">
                             <Edit className="w-4 h-4 text-blue-600" />
-                          </Button>
+                          </Link>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -10,7 +10,8 @@ import {
   Award, 
   Settings, 
   LogOut,
-  Menu
+  Menu,
+  Trophy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -19,6 +20,7 @@ const sidebarNavItems = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { title: "My Internships", href: "/dashboard/internships", icon: BookOpen },
   { title: "Tasks & Submissions", href: "/dashboard/tasks", icon: CheckSquare },
+  { title: "Leaderboard", href: "/dashboard/leaderboard", icon: Trophy },
   { title: "Certificates", href: "/dashboard/certificates", icon: Award },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

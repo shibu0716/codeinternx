@@ -10,14 +10,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/admin/login");
   }
 
-  // Check if user is an ADMIN
+  // Check if user is an ADMIN or their email is in the ADMIN_EMAILS list
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+  const isHardcodedAdmin = user.email && adminEmails.includes(user.email);
+
+  if (!isHardcodedAdmin && profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
     redirect("/dashboard?error=unauthorized_admin_access");
   }
 

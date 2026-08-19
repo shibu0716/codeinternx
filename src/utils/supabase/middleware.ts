@@ -45,6 +45,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // Admin 2FA Protection
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+  if (user && adminEmails.includes(user.email!)) {
+    const has2fa = request.cookies.get('admin_2fa_verified');
+    if (!has2fa && !request.nextUrl.pathname.startsWith('/verify-admin')) {
+      const verifyUrl = request.nextUrl.clone();
+      verifyUrl.pathname = '/verify-admin';
+      return NextResponse.redirect(verifyUrl);
+    }
+  }
+
   // Prevent logged-in users from seeing login/signup pages
   const authRoutes = ['/login', '/signup', '/forgot-password']
   const isAuthRoute = authRoutes.some((route) => request.nextUrl.pathname.startsWith(route))

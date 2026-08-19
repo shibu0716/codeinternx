@@ -3,6 +3,8 @@ import { createClient } from "@/utils/supabase/server";
 import { ApplicationsClient } from "./ApplicationsClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
+import { ImportApplicationsModal } from "./ImportApplicationsModal";
+
 export const metadata = {
   title: "Application Review | Admin",
 };
@@ -33,9 +35,12 @@ export default async function AdminApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
-        <p className="text-muted-foreground mt-1">Review student applications, approve them for payment, or reject them.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
+          <p className="text-muted-foreground mt-1">Review student applications, approve them for payment, or reject them.</p>
+        </div>
+        <ImportApplicationsModal />
       </div>
 
       <Card>

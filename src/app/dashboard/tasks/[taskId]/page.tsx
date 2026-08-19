@@ -10,6 +10,7 @@ import { ArrowLeft, CheckCircle2, Globe, FileWarning, MessageSquare } from "luci
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { TaskSubmissionClient } from "./TaskSubmissionClient";
 
 export default function TaskSubmissionPage() {
   const params = useParams();
@@ -84,37 +85,8 @@ export default function TaskSubmissionPage() {
               <CardDescription>Provide the URLs to your completed code and live deployment.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="githubUrl" className="flex items-center gap-2">
-                    <GitHubLogoIcon className="w-4 h-4" /> GitHub Repository URL <span className="text-red-500">*</span>
-                  </Label>
-                  <Input id="githubUrl" placeholder="https://github.com/username/repo-name" defaultValue="https://github.com/student/react-dashboard" required />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="liveUrl" className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" /> Live Deployment URL
-                  </Label>
-                  <Input id="liveUrl" placeholder="https://your-app.vercel.app" defaultValue="https://student-dashboard-demo.vercel.app" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" /> Submission Notes
-                  </Label>
-                  <Textarea 
-                    id="notes" 
-                    placeholder="Any comments for the evaluator? (e.g. 'I fixed the re-render issue in DashboardCard')" 
-                    className="min-h-24"
-                  />
-                </div>
-              </form>
+              <TaskSubmissionClient />
             </CardContent>
-            <CardFooter className="flex justify-end gap-3">
-              <Button variant="outline">Save Draft</Button>
-              <Button>Submit Revision</Button>
-            </CardFooter>
           </Card>
         </div>
 

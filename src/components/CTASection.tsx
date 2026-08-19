@@ -41,7 +41,7 @@ export function CTASection() {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 w-full sm:w-auto">
               <Link 
-                href="/internships" 
+                href="/login" 
                 className="w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-900 font-bold py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-2 text-base"
               >
                 Start Internship

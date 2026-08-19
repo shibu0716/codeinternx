@@ -10,7 +10,16 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { CTASection } from "@/components/CTASection";
 import { HomeInternshipCard } from "@/components/HomeInternshipCard";
 
-export default function Home() {
+import { createClient } from "@/utils/supabase/server";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: activePrograms } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("status", "ACTIVE")
+    .limit(3);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Premium Hero Section */}
@@ -43,7 +52,7 @@ export default function Home() {
           
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-              <Link href="/internships" className="w-full sm:w-auto">
+              <Link href="/login" className="w-full sm:w-auto">
                 <div className="group relative inline-flex items-center justify-center w-full sm:w-auto px-8 h-14 text-[15px] font-bold text-white transition-all duration-200 bg-slate-900 dark:bg-slate-800 font-pj rounded-xl hover:bg-slate-800 dark:hover:bg-slate-700 shadow-md hover:-translate-y-0.5">
                   Start Your Internship
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -56,7 +65,7 @@ export default function Home() {
                 </div>
               </Link>
             </div>
-            <Link href="/offer-letter" className="w-full sm:w-auto">
+            <Link href="/dashboard/offer-letter" className="w-full sm:w-auto">
               <div className="inline-flex items-center justify-center w-full sm:w-auto px-8 h-14 text-[15px] font-bold text-slate-700 dark:text-slate-200 transition-all duration-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm hover:-translate-y-0.5">
                 Download Offer Letter
                 <FileText className="w-4 h-4 ml-2 text-slate-500" />
@@ -142,7 +151,7 @@ export default function Home() {
             <p className="text-xl md:text-2xl font-serif italic text-slate-700 dark:text-slate-300 mb-8 max-w-2xl text-center">
               "The best way to predict the future is to create it. Start building your career today."
             </p>
-            <Link href="/internships">
+            <Link href="/login">
               <div className="group relative inline-flex items-center justify-center px-10 h-14 text-[15px] font-bold text-white transition-all duration-200 bg-slate-900 dark:bg-slate-800 font-pj rounded-xl hover:bg-slate-800 dark:hover:bg-slate-700 shadow-xl shadow-slate-200 dark:shadow-none hover:-translate-y-1">
                 Start Your Internship
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -179,7 +188,7 @@ export default function Home() {
                 Immersive, industry-aligned curriculums designed to push you beyond tutorial hell. Build production architectures, write scalable code, and deploy.
               </p>
             </div>
-            <Link href="/internships">
+            <Link href="/login">
               <Button size="lg" className="h-12 px-8 rounded-full font-bold shadow-lg shadow-slate-200 dark:shadow-none hover:-translate-y-1 transition-transform">
                 View All Programs
               </Button>
@@ -187,46 +196,30 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Full Stack Systems",
-                duration: "1 - 6 Months",
-                level: "Advanced",
-                mode: "Remote",
-                skills: ["Next.js", "Node.js", "PostgreSQL", "Redis Cache"],
-                slug: "full-stack-development",
-                color: "from-blue-500 to-indigo-500",
-                shadow: "group-hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.3)]",
-                icon: <Database className="w-7 h-7" />,
-                description: "Architect and deploy high-performance backend systems. Build secure authentication, integrate payment gateways, and optimize SQL queries for scale."
-              },
-              {
-                title: "Frontend Architecture",
-                duration: "1 - 6 Months",
-                level: "Intermediate",
-                mode: "Remote",
-                skills: ["React 19", "TypeScript", "Tailwind CSS", "Framer"],
-                slug: "frontend-development",
-                color: "from-purple-500 to-pink-500",
-                shadow: "group-hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.3)]",
-                icon: <LayoutTemplate className="w-7 h-7" />,
-                description: "Master modern client-side rendering. Build pixel-perfect, accessible UIs with complex state management, fluid animations, and server components."
-              },
-              {
-                title: "Applied AI & Data",
-                duration: "1 - 6 Months",
-                level: "Advanced",
-                mode: "Remote",
-                skills: ["Python", "PyTorch", "Vector DBs", "RAG"],
-                slug: "data-science-python",
-                color: "from-emerald-500 to-teal-500",
-                shadow: "group-hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]",
-                icon: <BrainCircuit className="w-7 h-7" />,
-                description: "Design and fine-tune machine learning pipelines. Implement Retrieval-Augmented Generation (RAG) and build AI-powered conversational agents."
-              }
-            ].map((program, i) => (
-              <HomeInternshipCard key={i} program={program} />
-            ))}
+            {activePrograms && activePrograms.length > 0 ? (
+              activePrograms.map((program: any, i: number) => {
+                const colorSchemes = [
+                  "from-blue-500 to-indigo-500",
+                  "from-purple-500 to-pink-500",
+                  "from-emerald-500 to-teal-500",
+                  "from-orange-500 to-amber-500"
+                ];
+                
+                const mappedProgram = {
+                  ...program,
+                  color: colorSchemes[i % colorSchemes.length],
+                  shadow: `group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)]`,
+                  duration: `${program.duration_months} Months`,
+                  icon: <Database className="w-7 h-7" />,
+                };
+
+                return <HomeInternshipCard key={program.id} program={mappedProgram} />;
+              })
+            ) : (
+              <div className="col-span-3 text-center py-12 text-slate-500">
+                <p>New internship programs will be announced soon.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

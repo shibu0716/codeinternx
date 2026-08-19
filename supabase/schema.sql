@@ -25,6 +25,7 @@ CREATE TABLE profiles (
     linkedin_url TEXT,
     role user_role DEFAULT 'STUDENT'::user_role,
     avatar_url TEXT,
+    username TEXT UNIQUE,
     is_public BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
