@@ -8,7 +8,7 @@ import { Menu, ArrowRight, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { logout } from "@/actions/auth";
+import { logout, checkIsAdminAction } from "@/actions/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,17 +47,34 @@ export function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const supabase = createClient();
     
+    const checkRole = async () => {
+      const isAdminUser = await checkIsAdminAction();
+      setIsAdmin(isAdminUser);
+    };
+
     // Get initial session
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
+      if (data.user) {
+        checkRole();
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkRole();
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -110,7 +127,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-6">
           {user ? (
             <>
-              <Link href="/dashboard" className="text-lg font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link href={isAdmin ? "/admin" : "/dashboard"} className="text-lg font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Dashboard
               </Link>
               <form action={logout}>
@@ -183,7 +200,7 @@ export function Navbar() {
             <div className="mt-auto border-t border-slate-200 dark:border-slate-800 p-6">
               {user ? (
                 <div className="flex flex-col gap-4">
-                  <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                  <Link href={isAdmin ? "/admin" : "/dashboard"} onClick={() => setIsOpen(false)}>
                     <Button className="w-full rounded-full h-12 text-base font-bold bg-blue-600 text-white hover:bg-blue-700">Go to Dashboard</Button>
                   </Link>
                   <form action={logout}>
