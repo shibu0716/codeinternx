@@ -1,30 +1,28 @@
 "use client";
 
-import { Monitor, Server, Cloud, Brain, ArrowRight } from "lucide-react";
+import { Monitor, Server, Terminal, Brain, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const techCategories = [
   {
-    id: "frontend",
-    title: "Frontend Development",
-    subtitle: "Building interactive user interfaces",
+    id: "web",
+    title: "Web Development",
+    subtitle: "Building modern full-stack web applications",
     icon: Monitor,
     iconBg: "bg-blue-50 dark:bg-blue-900/30",
     iconColor: "text-blue-500",
     tags: [
-      { name: "HTML", dot: "bg-[#E34F26]" },
-      { name: "CSS", dot: "bg-[#1572B6]" },
       { name: "REACT", dot: "bg-[#61DAFB]" },
-      { name: "ANGULAR", dot: "bg-[#DD0031]" },
-      { name: "VUE", dot: "bg-[#4FC08D]" },
-      { name: "JAVASCRIPT", dot: "bg-[#F7DF1E]" },
+      { name: "NEXT.JS", dot: "bg-slate-800 dark:bg-slate-200" },
+      { name: "NODE.JS", dot: "bg-[#339933]" },
+      { name: "POSTGRESQL", dot: "bg-[#336791]" },
       { name: "TYPESCRIPT", dot: "bg-[#3178C6]" },
     ]
   },
   {
-    id: "backend",
-    title: "Backend Systems",
-    subtitle: "Powering robust server-side logic",
+    id: "software",
+    title: "Software Engineering",
+    subtitle: "Building robust enterprise & high-performance systems",
     icon: Server,
     iconBg: "bg-emerald-50 dark:bg-emerald-900/30",
     iconColor: "text-emerald-500",
@@ -32,54 +30,54 @@ const techCategories = [
       { name: "PYTHON", dot: "bg-[#3776AB]" },
       { name: "JAVA", dot: "bg-[#007396]" },
       { name: "C++", dot: "bg-[#00599C]" },
-      { name: "NODE.JS", dot: "bg-[#339933]" },
+      { name: "SPRING BOOT", dot: "bg-[#6DB33F]" },
     ]
   },
   {
-    id: "devops",
-    title: "DevOps & Cloud",
-    subtitle: "Deploying scalable infrastructure",
-    icon: Cloud,
+    id: "systems",
+    title: "Systems Programming",
+    subtitle: "Low-level memory and hardware interaction",
+    icon: Terminal,
     iconBg: "bg-purple-50 dark:bg-purple-900/30",
     iconColor: "text-purple-500",
     tags: [
-      { name: "AWS", dot: "bg-[#FF9900]" },
-      { name: "KUBERNETES", dot: "bg-[#326CE5]" },
-      { name: "DOCKER", dot: "bg-[#2496ED]" },
-      { name: "GIT", dot: "bg-[#F05032]" },
+      { name: "C", dot: "bg-[#A8B9CC]" },
+      { name: "GCC", dot: "bg-[#FFD320]" },
+      { name: "MAKE", dot: "bg-[#27AE60]" },
       { name: "LINUX", dot: "bg-[#FCC624]" },
     ]
   },
   {
     id: "ai",
     title: "AI & Data Science",
-    subtitle: "Innovating with machine learning",
+    subtitle: "Innovating with models and data",
     icon: Brain,
     iconBg: "bg-orange-50 dark:bg-orange-900/30",
     iconColor: "text-orange-500",
     tags: [
       { name: "TENSORFLOW", dot: "bg-[#FF6F00]" },
       { name: "PYTORCH", dot: "bg-[#EE4C2C]" },
-      { name: "JUPYTER", dot: "bg-[#F37626]" },
+      { name: "LANGCHAIN", dot: "bg-[#1C3C3C]" },
+      { name: "PANDAS", dot: "bg-[#150458]" },
     ]
   }
 ];
 
 export function Technologies() {
   return (
-    <section className="py-24 px-4 bg-white dark:bg-slate-950 relative">
+    <section className="pt-12 pb-24 px-4 bg-white dark:bg-slate-950 relative">
       <div className="container mx-auto max-w-7xl">
         
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-[10px] uppercase tracking-widest mb-6">
-            SKILLS & TOOLS
+            INDUSTRY-STANDARD TECH STACK
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-[3.5rem] font-serif font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
-            Technologies You'll <span className="text-[#0084d1]">Work With</span> During Your Internship
+          <h2 className="text-4xl md:text-5xl lg:text-[3.5rem] font-serif font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
+            Master the <span className="text-[#0084d1]">Modern Tools</span> of Top Tech Companies
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto font-medium">
-            You'll apply these technologies while completing real assignments and portfolio projects.
+            Go beyond theory. Build scalable, production-grade applications using the exact same cutting-edge technologies that power today&apos;s leading startups and enterprises.
           </p>
         </div>
 
@@ -127,7 +125,7 @@ export function Technologies() {
         {/* Bottom Quote & Button */}
         <div className="text-center">
           <p className="text-lg md:text-xl font-serif italic text-slate-500 mb-8 max-w-2xl mx-auto">
-            "Projects are designed to reflect real development workflows used in companies."
+            &quot;Projects are designed to reflect real development workflows used in companies.&quot;
           </p>
           <Link href="/internships">
             <button className="bg-[#0f172a] hover:bg-black dark:bg-white dark:hover:bg-slate-200 text-white dark:text-black font-bold py-4 px-8 rounded-xl text-sm inline-flex items-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">

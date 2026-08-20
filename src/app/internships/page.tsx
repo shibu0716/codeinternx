@@ -1,15 +1,38 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { internships } from "@/lib/data";
 import { Search, Filter, Briefcase, Zap, Code2, Rocket, ArrowRight } from "lucide-react";
 
-export const metadata = {
-  title: "Internships | CodeInternX",
-  description: "Browse our project-based internships and career programs.",
-};
-
 export default function InternshipsPage() {
+  const [selectedCategory, setSelectedCategory] = useState("All Programs");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredInternships = internships.filter((program) => {
+    // Difficulty filter
+    if (selectedDifficulty.length > 0 && !selectedDifficulty.includes(program.level)) {
+      return false;
+    }
+    // Search filter
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      if (!program.title.toLowerCase().includes(q) && !program.technologies.some(t => t.toLowerCase().includes(q))) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const toggleDifficulty = (level: string) => {
+    setSelectedDifficulty(prev => 
+      prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30">
       
@@ -70,7 +93,13 @@ export default function InternshipsPage() {
                   <div className="space-y-3">
                     {["All Programs", "Web Development", "Data Science", "App Development", "Cloud & DevOps"].map((cat) => (
                       <label key={cat} className="flex items-center gap-3 cursor-pointer group">
-                        <input type="radio" name="category" className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-600 focus:ring-2" defaultChecked={cat === "All Programs"} />
+                        <input 
+                          type="radio" 
+                          name="category" 
+                          className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-600 focus:ring-2" 
+                          checked={selectedCategory === cat}
+                          onChange={() => setSelectedCategory(cat)}
+                        />
                         <span className="text-sm font-medium text-slate-600 group-hover:text-indigo-600 transition-colors">{cat}</span>
                       </label>
                     ))}
@@ -84,7 +113,12 @@ export default function InternshipsPage() {
                   <div className="space-y-3">
                     {["Beginner Friendly", "Intermediate", "Advanced"].map((level) => (
                       <label key={level} className="flex items-center gap-3 cursor-pointer group">
-                        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 focus:ring-2" />
+                        <input 
+                          type="checkbox" 
+                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 focus:ring-2" 
+                          checked={selectedDifficulty.includes(level)}
+                          onChange={() => toggleDifficulty(level)}
+                        />
                         <span className="text-sm font-medium text-slate-600 group-hover:text-indigo-600 transition-colors">{level}</span>
                       </label>
                     ))}
@@ -99,14 +133,27 @@ export default function InternshipsPage() {
             <div className="flex justify-between items-end mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Available Programs</h2>
-                <p className="text-slate-500 mt-1">Showing {internships.length} internships</p>
+                <p className="text-slate-500 mt-1">Showing {filteredInternships.length} internships</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {internships.map((program) => (
-                <div key={program.id} className="group flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
+              {filteredInternships.length > 0 ? (
+                filteredInternships.map((program) => {
+                  const isHighlighted = selectedCategory !== "All Programs" && program.category === selectedCategory;
+                  const isDimmed = selectedCategory !== "All Programs" && program.category !== selectedCategory;
                   
+                  return (
+                <div 
+                  key={program.id} 
+                  className={`group flex flex-col bg-white rounded-3xl border transition-all duration-300 overflow-hidden transform ${
+                    isHighlighted 
+                      ? 'border-indigo-500 shadow-xl shadow-indigo-500/20 ring-1 ring-indigo-500 scale-[1.02] z-10' 
+                      : isDimmed
+                        ? 'border-slate-200 shadow-sm opacity-50 grayscale-[50%] hover:opacity-100 hover:grayscale-0'
+                        : 'border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 hover:-translate-y-1'
+                  }`}
+                >
                   <div className="p-6 md:p-8 flex-1">
                     <div className="flex justify-between items-start mb-6 gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-indigo-600 border border-slate-100 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shrink-0">
@@ -168,7 +215,30 @@ export default function InternshipsPage() {
                   </div>
 
                 </div>
-              ))}
+              );
+            })
+            ) : (
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-slate-200">
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                  <Search className="w-8 h-8 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">No programs found</h3>
+                <p className="text-slate-500 max-w-sm mx-auto">
+                  Try adjusting your filters or search query to find the perfect internship program for you.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-6 border-slate-200"
+                  onClick={() => {
+                    setSelectedCategory("All Programs");
+                    setSelectedDifficulty([]);
+                    setSearchQuery("");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
             </div>
           </div>
 

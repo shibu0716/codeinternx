@@ -55,7 +55,7 @@ export function Footer() {
                 <span className="sr-only">Twitter</span>
                 <TwitterLogoIcon className="h-5 w-5" />
               </a>
-              <a href="https://github.com/codeinternx" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:bg-amber-500 hover:text-slate-950 transition-all hover:scale-110 hover:-translate-y-1">
+              <a href="https://github.com/internxcode" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:bg-amber-500 hover:text-slate-950 transition-all hover:scale-110 hover:-translate-y-1">
                 <span className="sr-only">GitHub</span>
                 <GitHubLogoIcon className="h-5 w-5" />
               </a>
