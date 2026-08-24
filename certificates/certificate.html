@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Internship</title>
+  <link rel="stylesheet" href="certificate.css">
+</head>
+<body>
+  <div class="certificate-container">
+    <!-- Blue/Navy decorative borders -->
+    <div class="border-outer"></div>
+    <div class="border-inner"></div>
+    <div class="ribbon-left">
+      <div class="ribbon-text">CODE TODAY. IMPACT TOMORROW.</div>
+    </div>
+    
+    <!-- Top section -->
+    <header>
+      <div class="logo-container">
+        <!-- SVG Placeholder if no logo is available -->
+        <img src="assets/logo.png" alt="CodeInternX Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNTAiPjx0ZXh0IHg9IjAiIHk9IjM1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMWU0MGFmIj5Db2RlSW50ZXJuWDwvdGV4dD48L3N2Zz4='">
+      </div>
+      <div class="tagline">LEARN &bull; INTERN &bull; GROW &bull; SUCCEED</div>
+    </header>
+
+    <!-- Content -->
+    <main>
+      <h1 class="title">CERTIFICATE OF INTERNSHIP</h1>
+      <div class="decorative-line"></div>
+      <p class="presented-to">This certificate is proudly presented to</p>
+      
+      <div class="student-name" id="studentName">{{student_name}}</div>
+      
+      <p class="description">
+        for successfully completing the <strong>{{internship_domain}}</strong> 
+        internship program at <strong>{{company_name}}</strong>.
+      </p>
+
+      <div class="duration">
+        Duration: {{start_date}} &ndash; {{end_date}}
+      </div>
+
+      <!-- Icon Section -->
+      <div class="icons-section">
+        <div class="icon-item">
+          <div class="icon-circle">L</div>
+          <span>LEARN</span>
+        </div>
+        <div class="icon-item">
+          <div class="icon-circle">I</div>
+          <span>INTERN</span>
+        </div>
+        <div class="icon-item">
+          <div class="icon-circle">G</div>
+          <span>GROW</span>
+        </div>
+        <div class="icon-item">
+          <div class="icon-circle">S</div>
+          <span>SUCCEED</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer section -->
+    <footer>
+      <div class="footer-left">
+        <div class="qr-placeholder">
+          <!-- The QR code will be injected here as an SVG or IMG -->
+          {{qr_code_svg}}
+        </div>
+        <div class="cert-info">
+          <div>Certificate ID: <br><strong>{{certificate_id}}</strong></div>
+          <div>Issue Date: <strong>{{issue_date}}</strong></div>
+        </div>
+      </div>
+
+      <div class="seal-container">
+        <!-- Seal placeholder -->
+        <div class="seal">
+          <div class="seal-text">VERIFIED</div>
+          <div class="seal-star">★</div>
+        </div>
+      </div>
+
+      <div class="signature-container">
+        <div class="signature-line">
+           <img class="signature-img" src="assets/signature.png" alt="Signature" onerror="this.style.display='none'">
+        </div>
+        <div class="signatory-name">{{signatory_name}}</div>
+        <div class="signatory-title">Authorized Signatory</div>
+      </div>
+    </footer>
+  </div>
+  <script>
+    // Adjust font size for very long student names
+    document.addEventListener("DOMContentLoaded", function() {
+      const nameEl = document.getElementById("studentName");
+      if (nameEl && nameEl.textContent.length > 25) {
+        nameEl.style.fontSize = "38px";
+      }
+      if (nameEl && nameEl.textContent.length > 35) {
+        nameEl.style.fontSize = "30px";
+      }
+    });
+  </script>
+</body>
+</html>

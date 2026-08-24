@@ -21,11 +21,14 @@ export default async function MyInternshipsPage() {
   // Fetch all enrollments for the user
   const { data: enrollments } = await supabase
     .from("enrollments")
-    .select("*, programs(*)")
+    .select("*, programs(*), applications(status)")
     .eq("student_id", user.id)
     .order("enrolled_at", { ascending: false });
 
-  if (!enrollments || enrollments.length === 0) {
+  // Only show internships where the application has been explicitly ENROLLED (Offer Accepted)
+  const activeEnrollments = enrollments?.filter((e: any) => e.applications?.status === 'ENROLLED') || [];
+
+  if (activeEnrollments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
         <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
@@ -50,12 +53,12 @@ export default async function MyInternshipsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {enrollments.map((enrollment) => (
+        {activeEnrollments.map((enrollment) => (
           <Card key={enrollment.id} className="flex flex-col h-full border-primary/10 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start mb-2">
-                <Badge variant={enrollment.payment_status === 'SUCCESS' ? 'default' : 'secondary'}>
-                  {enrollment.payment_status === 'SUCCESS' ? 'Active' : 'Payment Pending'}
+                <Badge variant="default">
+                  Active
                 </Badge>
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -77,28 +80,20 @@ export default async function MyInternshipsPage() {
                 </div>
               </div>
 
-              {enrollment.payment_status === 'SUCCESS' && (
-                <div className="space-y-2 pt-2">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span>Progress</span>
-                    <span>{enrollment.progress_percentage}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${enrollment.progress_percentage}%` }}></div>
-                  </div>
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between text-xs font-medium">
+                  <span>Progress</span>
+                  <span>{enrollment.progress_percentage}%</span>
                 </div>
-              )}
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${enrollment.progress_percentage}%` }}></div>
+                </div>
+              </div>
             </CardContent>
             <CardFooter className="pt-4 border-t">
-              {enrollment.payment_status === 'SUCCESS' ? (
-                <Link href={`/dashboard/tasks`} className="w-full">
-                  <Button className="w-full" variant="outline">View Tasks</Button>
-                </Link>
-              ) : (
-                <Link href={`/internships/${enrollment.programs?.slug}`} className="w-full">
-                  <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white">Complete Payment</Button>
-                </Link>
-              )}
+              <Link href={`/dashboard/tasks`} className="w-full">
+                <Button className="w-full" variant="outline">View Tasks</Button>
+              </Link>
             </CardFooter>
           </Card>
         ))}

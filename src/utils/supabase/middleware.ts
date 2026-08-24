@@ -45,14 +45,37 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Admin 2FA Protection
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
-  if (user && adminEmails.includes(user.email!)) {
-    const has2fa = request.cookies.get('admin_2fa_verified');
-    if (!has2fa && !request.nextUrl.pathname.startsWith('/verify-admin')) {
-      const verifyUrl = request.nextUrl.clone();
-      verifyUrl.pathname = '/verify-admin';
-      return NextResponse.redirect(verifyUrl);
+  // Middleware Role Check for /admin routes
+  if (request.nextUrl.pathname.startsWith('/admin') && user) {
+    const adminEmails = process.env.ADMIN_EMAILS?.toLowerCase().split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+    const isHardcodedAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+    
+    if (!isHardcodedAdmin) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+        
+      if (profile?.role !== 'SUPER_ADMIN' && profile?.role !== 'ADMIN') {
+        const dashboardUrl = request.nextUrl.clone();
+        dashboardUrl.pathname = '/dashboard';
+        dashboardUrl.searchParams.set('error', 'unauthorized_admin_access');
+        return NextResponse.redirect(dashboardUrl);
+      }
+    }
+  }
+
+  // Admin 2FA Protection — only enforce when accessing /admin routes
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    const adminEmails2fa = process.env.ADMIN_EMAILS?.toLowerCase().split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+    if (user && user.email && adminEmails2fa.includes(user.email.toLowerCase())) {
+      const has2fa = request.cookies.get('admin_2fa_verified');
+      if (!has2fa && !request.nextUrl.pathname.startsWith('/verify-admin')) {
+        const verifyUrl = request.nextUrl.clone();
+        verifyUrl.pathname = '/verify-admin';
+        return NextResponse.redirect(verifyUrl);
+      }
     }
   }
 

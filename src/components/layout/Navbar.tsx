@@ -46,7 +46,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
-
+  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -65,6 +65,7 @@ export function Navbar() {
       } else {
         setIsAdmin(false);
       }
+      setLoading(false);
     });
 
     // Listen for auth changes
@@ -75,6 +76,7 @@ export function Navbar() {
       } else {
         setIsAdmin(false);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -125,7 +127,9 @@ export function Navbar() {
 
         {/* Right: CTA Actions */}
         <div className="hidden md:flex items-center gap-6">
-          {user ? (
+          {loading ? (
+            <div className="h-12 w-32 bg-slate-200 dark:bg-slate-800 animate-pulse rounded-full"></div>
+          ) : user ? (
             <>
               <Link href={isAdmin ? "/admin" : "/dashboard"} className="text-lg font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Dashboard

@@ -1,4 +1,3 @@
-import { getInternshipBySlug, internships } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -6,33 +5,74 @@ import { CheckCircle2, Clock, MapPin, BarChart, FileCode2, Target, Briefcase, Za
 import { EnrollmentCard } from "@/components/EnrollmentCard";
 import { createClient } from "@/utils/supabase/server";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 export async function generateStaticParams() {
-  return internships.map((internship) => ({
-    slug: internship.slug,
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const { data: programs } = await supabase.from("programs").select("slug").eq("category", "INTERNSHIP");
+  
+  return (programs || []).map((program) => ({
+    slug: program.slug,
   }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { slug } = await params;
-  const internship = getInternshipBySlug(slug);
-  if (!internship) return { title: "Not Found" };
+  const supabase = await createClient();
+  const { data: program } = await supabase.from("programs").select("title, description").eq("slug", slug).single();
+  
+  if (!program) return { title: "Not Found" };
 
   return {
-    title: `${internship.title} Internship | CodeInternX`,
-    description: internship.description,
+    title: `${program.title} Internship | CodeInternX`,
+    description: program.description,
   };
 }
 
 export default async function InternshipDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
-  const internship = getInternshipBySlug(slug);
+  const supabase = await createClient();
+  
+  const { data: internship } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("slug", slug)
+    .single();
 
   if (!internship) {
     notFound();
   }
 
-  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Fetch tasks to build the curriculum and stats
+  const { data: tasks } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("program_id", internship.id)
+    .order("week_number", { ascending: true });
+    
+  const taskList = tasks || [];
+  const numberOfTasks = taskList.length;
+  const finalProjectTask = taskList.find(t => t.is_final_project) || taskList[taskList.length - 1];
+  const finalProjectTitle = finalProjectTask ? finalProjectTask.title : "Comprehensive Final Project";
+  const expectedWorkload = "10-15 hours/week";
+
+  // Build curriculum from tasks
+  const curriculum = taskList.map((task) => ({
+    week: task.week_number,
+    title: task.title
+  }));
+  
+  // fallback curriculum if no tasks
+  if (curriculum.length === 0) {
+    for (let i = 1; i <= internship.duration_weeks; i++) {
+      curriculum.push({ week: i, title: `Week ${i} Curriculum` });
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30">
@@ -69,7 +109,7 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
               <div className="flex flex-wrap items-center gap-4 md:gap-8 bg-slate-900/50 backdrop-blur-md border border-slate-800 p-6 rounded-2xl shadow-xl w-fit">
                 <div className="flex flex-col gap-1">
                   <span className="text-slate-500 text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Duration</span>
-                  <span className="text-white font-medium">1 - 6 Months</span>
+                  <span className="text-white font-medium">{internship.duration_weeks} Weeks</span>
                 </div>
                 <div className="w-px h-10 bg-slate-800 hidden md:block"></div>
                 <div className="flex flex-col gap-1">
@@ -117,17 +157,17 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <Zap className="w-6 h-6 text-amber-500 mb-4" />
                     <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Workload</p>
-                    <p className="text-xl font-bold text-slate-900">{internship.expectedWorkload}</p>
+                    <p className="text-xl font-bold text-slate-900">{expectedWorkload}</p>
                   </div>
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <Briefcase className="w-6 h-6 text-emerald-500 mb-4" />
                     <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Tasks</p>
-                    <p className="text-xl font-bold text-slate-900">{internship.numberOfTasks}</p>
+                    <p className="text-xl font-bold text-slate-900">{numberOfTasks}</p>
                   </div>
                   <div className="bg-indigo-950 p-6 rounded-2xl border border-indigo-900 shadow-lg text-white">
                     <FileCode2 className="w-6 h-6 text-indigo-400 mb-4" />
                     <p className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-2">Final Project</p>
-                    <p className="text-lg font-bold leading-tight">{internship.finalProject}</p>
+                    <p className="text-lg font-bold leading-tight">{finalProjectTitle}</p>
                   </div>
                 </div>
               </div>
@@ -139,7 +179,7 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
                   Tech Stack You Will Master
                 </h2>
                 <div className="flex flex-wrap gap-3">
-                  {internship.technologies.map((tech) => (
+                  {(internship.technologies || []).map((tech: string) => (
                     <div key={tech} className="px-5 py-2.5 bg-white border border-slate-200 shadow-sm rounded-xl text-sm font-semibold text-slate-700 flex items-center gap-2 hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
                       <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
                       {tech}
@@ -156,7 +196,7 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
                 </h2>
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-2">
                   <Accordion className="w-full">
-                    {internship.curriculum.map((item, index) => (
+                    {curriculum.map((item) => (
                       <AccordionItem key={item.week} value={`week-${item.week}`} className="border-b-slate-100 last:border-0 px-4">
                         <AccordionTrigger className="text-lg font-semibold hover:no-underline py-6">
                           <span className="flex items-center gap-4 text-left">
@@ -209,10 +249,6 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
               <div className="lg:sticky lg:top-24 mt-8 lg:mt-0 block lg:hidden">
                 <EnrollmentCard internship={internship} user={user} />
               </div>
-              {/* We show it inline on mobile, but on desktop it's already in the hero section. 
-                  Wait, if it's strictly in the hero section for desktop, what if they scroll down? 
-                  Let's make a sticky version for desktop scrolling, or just leave it in the hero. 
-                  We will keep it sticky on desktop too! */}
               <div className="hidden lg:block lg:sticky lg:top-24">
                 <div className="opacity-0 translate-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-forwards" style={{ animationDelay: '500ms' }}>
                   <EnrollmentCard internship={internship} user={user} />

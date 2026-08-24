@@ -2,40 +2,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, Clock, BookOpen, Layers, Zap } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata = {
   title: "Premium Courses | CodeInternX",
   description: "Level up your engineering skills with deep-dive courses on system design, data structures, and modern frameworks.",
 };
 
-const COURSES = [
-  {
-    title: "System Design for Interviews",
-    description: "Learn how to architect scalable distributed systems. Covers load balancing, database sharding, caching strategies, and microservices.",
-    level: "Advanced",
-    duration: "6 Weeks",
-    modules: 12,
-    slug: "system-design",
-  },
-  {
-    title: "Data Structures & Algorithms in TypeScript",
-    description: "Master the core data structures and algorithms required to crack top-tier technical interviews, taught entirely in TypeScript.",
-    level: "Intermediate",
-    duration: "8 Weeks",
-    modules: 24,
-    slug: "data-structures",
-  },
-  {
-    title: "Next.js 15 Masterclass",
-    description: "Build a production-ready application using Next.js App Router, Server Actions, React Server Components, and Turbopack.",
-    level: "Intermediate",
-    duration: "4 Weeks",
-    modules: 10,
-    slug: "nextjs-masterclass",
-  }
-];
+export default async function CoursesPage() {
+  const supabase = await createClient();
 
-export default function CoursesPage() {
+  const { data: courses, error } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("is_published", true)
+    .eq("category", "COURSE")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching courses:", error);
+  }
+
+  const courseList = courses || [];
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30">
       
@@ -61,48 +50,55 @@ export default function CoursesPage() {
       {/* Courses Grid */}
       <section className="py-16 md:py-24 px-4 relative -mt-16 z-20">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {COURSES.map((course) => (
-              <div key={course.slug} className="group flex flex-col bg-white rounded-2xl border border-slate-200 shadow-lg hover:shadow-xl hover:border-indigo-200 transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
-                
-                <div className="p-6 md:p-8 flex-1">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
-                      <BookOpen className="w-6 h-6" />
-                    </div>
-                    <Badge variant="outline" className={`font-semibold border-2 ${course.level === "Advanced" ? "text-amber-600 border-amber-200 bg-amber-50" : "text-emerald-600 border-emerald-200 bg-emerald-50"}`}>
-                      {course.level}
-                    </Badge>
-                  </div>
+          {courseList.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {courseList.map((course) => (
+                <div key={course.slug} className="group flex flex-col bg-white rounded-2xl border border-slate-200 shadow-lg hover:shadow-xl hover:border-indigo-200 transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
                   
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-600 transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-slate-500 leading-relaxed text-sm md:text-base">
-                    {course.description}
-                  </p>
-                </div>
-
-                <div className="px-6 md:px-8 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-4 text-sm font-medium text-slate-600">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-indigo-500" /> {course.duration}
+                  <div className="p-6 md:p-8 flex-1">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <Badge variant="outline" className={`font-semibold border-2 ${course.level === "ADVANCED" ? "text-amber-600 border-amber-200 bg-amber-50" : "text-emerald-600 border-emerald-200 bg-emerald-50"}`}>
+                        {course.level}
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-slate-900 mb-3 leading-tight group-hover:text-indigo-600 transition-colors">
+                      {course.title}
+                    </h3>
+                    <p className="text-slate-500 leading-relaxed text-sm md:text-base">
+                      {course.description}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-purple-500" /> {course.modules} Modules
+
+                  <div className="px-6 md:px-8 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-4 text-sm font-medium text-slate-600">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-indigo-500" /> {course.duration_weeks} Weeks
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-purple-500" /> Self-paced
+                    </div>
                   </div>
-                </div>
 
-                <div className="p-6 md:p-8 pt-0 bg-slate-50">
-                  <Link href={`/courses/${course.slug}`} className="w-full block">
-                    <Button className="w-full rounded-xl h-12 text-base font-semibold bg-slate-900 hover:bg-indigo-600 transition-colors shadow-md hover:shadow-indigo-500/25">
-                      View Curriculum <PlayCircle className="w-5 h-5 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
+                  <div className="p-6 md:p-8 pt-0 bg-slate-50">
+                    <Link href={`/courses/${course.slug}`} className="w-full block">
+                      <Button className="w-full rounded-xl h-12 text-base font-semibold bg-slate-900 hover:bg-indigo-600 transition-colors shadow-md hover:shadow-indigo-500/25">
+                        View Curriculum <PlayCircle className="w-5 h-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
 
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">No courses available</h3>
+              <p className="text-slate-500">Check back later for new premium courses.</p>
+            </div>
+          )}
         </div>
       </section>
 

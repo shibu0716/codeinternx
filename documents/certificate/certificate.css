@@ -1,0 +1,180 @@
+/* Certificate Specific Styles */
+
+.document-page.landscape {
+    padding: 1rem; /* Space outside outer border */
+}
+
+.border-outer {
+    border: 12px solid var(--ci-navy);
+    height: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.border-inner {
+    border: 2px solid var(--ci-blue);
+    height: 100%;
+    position: relative;
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--ci-white);
+}
+
+/* Corner Decorators */
+.corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+}
+
+.top-left {
+    top: 0;
+    left: 0;
+    border-top: 15px solid var(--ci-blue);
+    border-left: 15px solid var(--ci-blue);
+}
+
+.top-right {
+    top: 0;
+    right: 0;
+    border-top: 15px solid var(--ci-blue);
+    border-right: 15px solid var(--ci-blue);
+}
+
+.bottom-left {
+    bottom: 0;
+    left: 0;
+    border-bottom: 15px solid var(--ci-blue);
+    border-left: 15px solid var(--ci-blue);
+}
+
+.bottom-right {
+    bottom: 0;
+    right: 0;
+    border-bottom: 15px solid var(--ci-blue);
+    border-right: 15px solid var(--ci-blue);
+}
+
+.cert-content {
+    text-align: center;
+    width: 85%;
+    max-width: 900px;
+    position: relative;
+    z-index: 1;
+}
+
+header {
+    margin-bottom: 2rem;
+}
+
+.ci-logo {
+    max-width: 250px;
+    margin-bottom: 1rem;
+}
+
+.tagline {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    margin: 0;
+}
+
+.presented-to {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+}
+
+.name-container {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.student-name {
+    font-size: 4rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.cert-divider {
+    height: 3px;
+    width: 150px;
+    margin: 1.5rem auto;
+}
+
+.description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.values {
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    margin-bottom: 3rem;
+}
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    margin-top: 2rem;
+}
+
+.signature-block {
+    width: 200px;
+    text-align: center;
+}
+
+.ci-signature {
+    max-width: 150px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: -10px;
+}
+
+.date-text {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    height: 30px;
+}
+
+.line {
+    border-top: 1px solid var(--ci-gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.label {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.seal-block {
+    margin-bottom: -20px;
+}
+
+.ci-seal {
+    width: 140px;
+    height: 140px;
+}
+
+.meta-block {
+    position: absolute;
+    bottom: -15px;
+    left: -15px;
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--ci-gray-500);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meta-block p {
+    margin: 0;
+}

@@ -54,12 +54,16 @@ export default async function PaymentPage({
     );
   }
 
+  const { getPaymentSettings } = await import("@/actions/payments");
+  const settings = await getPaymentSettings();
+
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12">
       <PaymentCheckoutClient 
         application={application} 
         userEmail={user.email!} 
         userName={application.profiles?.full_name || "Student"}
+        settings={settings}
       />
     </div>
   );

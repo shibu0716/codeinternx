@@ -32,21 +32,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Get Program ID
+    // 1. Get Program ID (Fallback to null if DB is empty to prevent UI from breaking)
     const { data: program } = await supabase
       .from("programs")
       .select("id")
       .eq("slug", programSlug)
       .single();
 
-    if (!program) {
-      return NextResponse.json({ error: "Invalid program selected" }, { status: 404 });
-    }
+    const programId = program ? program.id : null;
 
-    // 2. Update Profile metadata
-    await supabase
+    // 2. Update or Create Profile metadata
+    const { error: profileError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
+        email: user.email,
         full_name: fullName,
         phone: phone,
         college: college,
@@ -54,8 +54,11 @@ export async function POST(req: Request) {
         graduation_year: parseInt(graduationYear) || null,
         linkedin_url: linkedinUrl,
         github_url: githubUrl,
-      })
-      .eq("id", user.id);
+      });
+
+    if (profileError) {
+      throw profileError;
+    }
 
     // 3. Generate Application ID
     const appId = `CI-APP-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
@@ -66,10 +69,10 @@ export async function POST(req: Request) {
       .insert({
         application_id: appId,
         student_id: user.id,
-        program_id: program.id,
+        program_id: programId,
         source: source || 'WEBSITE',
         status: 'PENDING',
-        notes: JSON.stringify({ branch, currentYear, portfolioUrl })
+        notes: JSON.stringify({ branch, currentYear, portfolioUrl, programSlug })
       })
       .select()
       .single();
@@ -81,11 +84,17 @@ export async function POST(req: Request) {
       }
       throw appError;
     }
+    
+    // 5. Send Confirmation Email (non-blocking)
+    import("@/lib/email").then((module) => {
+       const programTitle = programSlug.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+       module.sendApplicationConfirmationEmail(email, fullName, programTitle, appId).catch(console.error);
+    });
 
     return NextResponse.json({ success: true, application_id: application.application_id, id: application.id });
 
   } catch (error: any) {
     console.error("Application submission error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || JSON.stringify(error) || "Internal Server Error" }, { status: 500 });
   }
 }

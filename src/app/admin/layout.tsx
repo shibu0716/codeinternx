@@ -17,8 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("id", user.id)
     .single();
 
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
-  const isHardcodedAdmin = user.email && adminEmails.includes(user.email);
+  const adminEmails = process.env.ADMIN_EMAILS?.toLowerCase().split(',').map(e => e.replace(/['"]/g, '').trim()) || [];
+  const isHardcodedAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
 
   if (!isHardcodedAdmin && profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
     redirect("/dashboard?error=unauthorized_admin_access");

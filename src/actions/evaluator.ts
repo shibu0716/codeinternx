@@ -38,7 +38,7 @@ export async function gradeSubmission(formData: FormData) {
     .upsert({
       submission_id: submissionId,
       evaluator_id: user.id,
-      overall_score: score,
+      total_score: score,
       feedback: feedback
     }, { onConflict: "submission_id" });
 

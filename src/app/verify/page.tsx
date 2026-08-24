@@ -37,7 +37,7 @@ export default function VerifyPage() {
             <p className="text-slate-500">The Credential ID is located at the bottom of the certificate.</p>
           </div>
           
-          <form action={async (formData) => { "use server"; const { redirect } = await import('next/navigation'); redirect(`/verify/${formData.get('id')}`); }} className="flex flex-col sm:flex-row gap-4">
+          <form action={async (formData) => { "use server"; const { redirect } = await import('next/navigation'); redirect(`/verify/certificate/${formData.get('id')}`); }} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input 

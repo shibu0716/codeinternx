@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Offer Letter</title>
+    <link rel="stylesheet" href="../shared/brand.css">
+    <link rel="stylesheet" href="offer-letter.css">
+</head>
+<body class="document-page">
+    <!-- Geometric Decorators -->
+    <div class="decor top-left"></div>
+    <div class="decor top-right"></div>
+    <div class="decor bottom-left"></div>
+    <div class="decor bottom-right"></div>
+
+    <div class="page-content">
+        <header>
+            <div class="logo-container">
+                <img src="../shared/assets/codeinternx-logo.png" alt="CodeInternX" class="ci-logo">
+                <p class="tagline font-heading text-navy">Innovate. Build. Scale.</p>
+            </div>
+            <div class="company-details text-gray-500">
+                <p>www.codeinternx.com</p>
+                <p>contact@codeinternx.com</p>
+                <p>Bengaluru, India</p>
+            </div>
+        </header>
+
+        <main>
+            <h1 class="document-title font-heading text-navy text-center">OFFER LETTER</h1>
+            <div class="title-divider bg-blue"></div>
+
+            <div class="meta-info">
+                <p><strong>Date:</strong> {{issue_date}}</p>
+                <p><strong>Ref ID:</strong> {{offer_letter_id}}</p>
+            </div>
+
+            <section class="content-body">
+                <p>Dear <strong><span class="auto-scale">{{student_name}}</span></strong>,</p>
+                
+                <p>We are pleased to extend this offer to you for the position of <strong>{{position}}</strong> at CodeInternX.</p>
+                
+                <div class="position-details bg-light-blue">
+                    <p><strong>Position:</strong> {{position}}</p>
+                    <p><strong>Department:</strong> {{department}}</p>
+                    <p><strong>Work Mode:</strong> {{work_mode}}</p>
+                    <p><strong>Internship Duration:</strong> {{start_date}} &ndash; {{end_date}}</p>
+                </div>
+
+                <h3 class="font-heading text-navy">Roles & Responsibilities</h3>
+                <div class="responsibilities-list">
+                    {{responsibilities}}
+                </div>
+
+                <h3 class="font-heading text-navy">Offer Terms</h3>
+                <p>During your internship, you are expected to adhere to the company's rules, maintain confidentiality of our proprietary information, and conduct yourself professionally. This internship is an at-will arrangement, and either party may terminate it at any time.</p>
+
+                <h3 class="font-heading text-navy">Acceptance</h3>
+                <p>Please indicate your acceptance of this offer by signing and returning this letter. We look forward to welcoming you to the CodeInternX team.</p>
+            </section>
+        </main>
+
+        <footer>
+            <div class="signature-section">
+                <div class="seal-container">
+                    <img src="../shared/assets/codeinternx-seal.png" alt="Company Seal" class="ci-seal">
+                </div>
+                <div class="sign-container">
+                    <img src="../shared/assets/ceo-signature.png" alt="Signature" class="ci-signature">
+                    <p class="font-bold text-navy">{{signatory_name}}</p>
+                    <p class="text-gray-500">Chief Executive Officer</p>
+                    <p class="text-gray-500">CodeInternX</p>
+                </div>
+            </div>
+            <!-- Verification QR -->
+            <div class="qr-code">
+                <img src="{{qr_code}}" alt="Verification QR" width="60" height="60">
+            </div>
+        </footer>
+    </div>
+    
+    <script src="../shared/document-utils.js"></script>
+</body>
+</html>

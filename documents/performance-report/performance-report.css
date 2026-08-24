@@ -1,0 +1,193 @@
+/* Performance Report Specific Styles */
+
+.document-page {
+    position: relative;
+    padding: 2rem;
+}
+
+.header-band {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 15px;
+}
+
+.page-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+}
+
+.document-title {
+    font-size: 1.6rem;
+    margin: 1rem 0 0 0;
+    letter-spacing: 1px;
+}
+
+.intern-info-card {
+    border: 1px solid var(--ci-gray-200);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: white;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Overall Performance Circular Indicator */
+.overall-performance-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.overall-circle-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.rating-circle {
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: var(--ci-gray-100);
+    stroke-width: 8;
+}
+
+.circle-progress {
+    fill: none;
+    stroke: var(--ci-blue);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: calc(2 * 3.14159 * 45);
+    /* dashoffset will be calculated via var */
+    stroke-dashoffset: calc((2 * 3.14159 * 45) - ((2 * 3.14159 * 45) * var(--rating-percentage, 0%) / 100));
+    transition: stroke-dashoffset 1s ease;
+}
+
+.rating-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    line-height: 1.2;
+}
+
+#overall-rating-value {
+    font-size: 1.5rem;
+}
+
+.out-of {
+    font-size: 0.8rem;
+    color: var(--ci-gray-500);
+}
+
+.percentage-text {
+    font-size: 0.85rem;
+}
+
+/* Table */
+.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--ci-blue);
+    display: inline-block;
+    padding-bottom: 0.2rem;
+}
+
+.eval-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.eval-table th, .eval-table td {
+    border: 1px solid var(--ci-gray-200);
+    padding: 0.6rem;
+    text-align: left;
+}
+
+.eval-table th {
+    background-color: var(--ci-light-blue);
+    color: var(--ci-navy);
+    font-weight: 600;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.feedback-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.feedback-box h4, .manager-comments h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.feedback-box ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+}
+
+.manager-comments p {
+    font-size: 0.85rem;
+    margin: 0;
+    font-style: italic;
+    background: var(--ci-gray-100);
+    padding: 0.8rem;
+    border-radius: 4px;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.footer-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--ci-gray-500);
+    margin-bottom: 1rem;
+}
+
+.footer-meta p {
+    margin: 0;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}

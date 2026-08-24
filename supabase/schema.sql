@@ -6,9 +6,8 @@ CREATE TYPE user_role AS ENUM ('SUPER_ADMIN', 'ADMIN', 'EVALUATOR', 'STUDENT', '
 CREATE TYPE program_mode AS ENUM ('ONLINE', 'OFFLINE', 'HYBRID');
 CREATE TYPE program_level AS ENUM ('BEGINNER', 'INTERMEDIATE', 'ADVANCED');
 CREATE TYPE submission_status AS ENUM ('PENDING', 'CHANGES_REQUESTED', 'APPROVED', 'REJECTED');
-CREATE TYPE payment_status AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED');
+CREATE TYPE payment_status AS ENUM ('PENDING_VERIFICATION', 'VERIFIED', 'REJECTED', 'RESUBMISSION_REQUIRED', 'CANCELLED', 'SUCCESS', 'FAILED', 'REFUNDED');
 CREATE TYPE application_status AS ENUM ('PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'PAYMENT_PENDING', 'PAID', 'ENROLLED', 'CANCELLED');
-CREATE TYPE order_status AS ENUM ('CREATED', 'PENDING', 'PAID', 'FAILED', 'CANCELLED', 'REFUNDED');
 CREATE TYPE application_source AS ENUM ('WEBSITE', 'GOOGLE_FORM', 'WHATSAPP', 'REFERRAL', 'OTHER');
 
 -- Profiles Table (Extends Supabase Auth Users)
@@ -78,32 +77,43 @@ CREATE TABLE applications (
     UNIQUE(student_id, program_id)
 );
 
--- Orders Table
-CREATE TABLE orders (
+-- Payment Settings Table
+CREATE TABLE payment_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
-    program_id UUID REFERENCES programs(id) ON DELETE CASCADE,
-    razorpay_order_id TEXT UNIQUE NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    currency TEXT DEFAULT 'INR',
-    status order_status DEFAULT 'CREATED'::order_status,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
+    account_holder_name TEXT NOT NULL,
+    bank_name TEXT NOT NULL,
+    account_number TEXT NOT NULL,
+    ifsc_code TEXT NOT NULL,
+    upi_id_primary TEXT NOT NULL,
+    upi_id_secondary TEXT,
+    payee_name TEXT,
+    payment_qr_code_url TEXT,
+    instructions TEXT,
+    updated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Payments Table
 CREATE TABLE payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
-    razorpay_payment_id TEXT UNIQUE NOT NULL,
-    razorpay_order_id TEXT NOT NULL,
+    enrollment_id UUID REFERENCES enrollments(id) ON DELETE CASCADE,
     amount DECIMAL(10,2) NOT NULL,
     currency TEXT DEFAULT 'INR',
-    status payment_status DEFAULT 'SUCCESS'::payment_status,
-    payment_method TEXT,
+    payment_method TEXT NOT NULL,
+    transaction_id TEXT UNIQUE NOT NULL,
+    utr_number TEXT,
+    payment_date DATE NOT NULL,
+    payment_time TIME,
+    proof_file_url TEXT NOT NULL,
+    notes TEXT,
+    status payment_status DEFAULT 'PENDING_VERIFICATION'::payment_status,
+    submitted_at TIMESTAMPTZ DEFAULT NOW(),
+    reviewed_at TIMESTAMPTZ,
+    reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    rejection_reason TEXT,
+    admin_notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -114,7 +124,6 @@ CREATE TABLE enrollments (
     student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     program_id UUID REFERENCES programs(id) ON DELETE CASCADE,
     application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
-    order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
     duration_months INTEGER DEFAULT 1,
     enrolled_at TIMESTAMPTZ DEFAULT NOW(),
     progress_percentage INTEGER DEFAULT 0,
@@ -173,19 +182,101 @@ ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payment_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE evaluations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
 
--- (Basic policies placeholder, will refine later)
+-- 1. Helper Function to check if user is admin
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role IN ('ADMIN', 'SUPER_ADMIN')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 2. Profiles
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles FOR SELECT USING (is_public = true);
 CREATE POLICY "Users can view their own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Admins can manage all profiles" ON profiles FOR ALL USING (public.is_admin());
 
+-- 3. Programs
 CREATE POLICY "Published programs are viewable by everyone" ON programs FOR SELECT USING (is_published = true);
+CREATE POLICY "Admins can manage all programs" ON programs FOR ALL USING (public.is_admin());
 
+-- 4. Tasks
+CREATE POLICY "Anyone can view tasks" ON tasks FOR SELECT USING (true);
+CREATE POLICY "Admins can manage all tasks" ON tasks FOR ALL USING (public.is_admin());
+
+-- 5. Applications
+CREATE POLICY "Students can view their own applications" ON applications FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Students can insert their own applications" ON applications FOR INSERT WITH CHECK (auth.uid() = student_id);
+CREATE POLICY "Students can update their own applications" ON applications FOR UPDATE USING (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all applications" ON applications FOR ALL USING (public.is_admin());
+
+-- 7. Payments
+CREATE POLICY "Students can view their own payments" ON payments FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Students can insert their own payments" ON payments FOR INSERT WITH CHECK (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all payments" ON payments FOR ALL USING (public.is_admin());
+
+-- 7b. Payment Settings
+CREATE POLICY "Anyone can view payment settings" ON payment_settings FOR SELECT USING (true);
+CREATE POLICY "Admins can update payment settings" ON payment_settings FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Admins can insert payment settings" ON payment_settings FOR INSERT WITH CHECK (public.is_admin());
+
+-- 8. Enrollments
 CREATE POLICY "Students can view their own enrollments" ON enrollments FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Students can insert their own enrollments" ON enrollments FOR INSERT WITH CHECK (auth.uid() = student_id);
+CREATE POLICY "Students can update their own enrollments" ON enrollments FOR UPDATE USING (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all enrollments" ON enrollments FOR ALL USING (public.is_admin());
+
+-- 9. Submissions
 CREATE POLICY "Students can view their own submissions" ON submissions FOR SELECT USING (auth.uid() = student_id);
 CREATE POLICY "Students can create submissions" ON submissions FOR INSERT WITH CHECK (auth.uid() = student_id);
+CREATE POLICY "Students can update their own submissions" ON submissions FOR UPDATE USING (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all submissions" ON submissions FOR ALL USING (public.is_admin());
+
+-- 10. Evaluations
+CREATE POLICY "Students can view their own evaluations" ON evaluations FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM submissions 
+    WHERE submissions.id = evaluations.submission_id 
+    AND submissions.student_id = auth.uid()
+  )
+);
+CREATE POLICY "Admins can manage all evaluations" ON evaluations FOR ALL USING (public.is_admin());
+
+-- 11. Certificates
+CREATE POLICY "Public can verify certificates" ON certificates FOR SELECT USING (true);
+CREATE POLICY "Students can view their own certificates" ON certificates FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all certificates" ON certificates FOR ALL USING (public.is_admin());
+CREATE TYPE document_type AS ENUM ('OFFER_LETTER', 'PERFORMANCE_REPORT', 'CERTIFICATE', 'LOR');
+CREATE TYPE document_status AS ENUM ('DRAFT', 'ISSUED', 'ACCEPTED', 'DECLINED', 'REVOKED');
+
+CREATE TABLE internship_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    document_id TEXT UNIQUE NOT NULL, -- e.g. OL-2026-000001, PR-2026-000001
+    type document_type NOT NULL,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    enrollment_id UUID REFERENCES enrollments(id) ON DELETE CASCADE,
+    status document_status DEFAULT 'DRAFT'::document_status,
+    issue_date DATE,
+    pdf_url TEXT,
+    verification_url TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb, -- Store dynamic fields here
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(type, enrollment_id) -- one of each type per enrollment/internship
+);
+
+ALTER TABLE internship_documents ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can verify documents" ON internship_documents FOR SELECT USING (status IN ('ISSUED', 'ACCEPTED', 'REVOKED'));
+CREATE POLICY "Students can view their own documents" ON internship_documents FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Admins can manage all documents" ON internship_documents FOR ALL USING (public.is_admin());

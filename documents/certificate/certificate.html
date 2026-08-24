@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Completion</title>
+    <link rel="stylesheet" href="../shared/brand.css">
+    <link rel="stylesheet" href="certificate.css">
+</head>
+<body class="document-page landscape">
+    <div class="border-outer">
+        <div class="border-inner">
+            
+            <!-- Corner Decorators -->
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+
+            <div class="cert-content">
+                <header>
+                    <img src="../shared/assets/codeinternx-logo.png" alt="CodeInternX" class="ci-logo">
+                    <p class="tagline font-heading text-navy">CERTIFICATE OF COMPLETION</p>
+                </header>
+
+                <main>
+                    <p class="presented-to text-gray-500">THIS CERTIFICATE IS PROUDLY PRESENTED TO</p>
+                    
+                    <div class="name-container">
+                        <h1 class="student-name font-heading text-navy auto-scale">{{student_name}}</h1>
+                    </div>
+                    
+                    <div class="cert-divider bg-blue"></div>
+
+                    <p class="description">
+                        For successfully completing the internship in <strong>{{internship_domain}}</strong> at <strong>{{company_name}}</strong>.
+                        <br>
+                        Duration: {{start_date}} to {{end_date}}.
+                    </p>
+
+                    <div class="values font-heading text-navy">
+                        LEARN &nbsp;&bull;&nbsp; INTERN &nbsp;&bull;&nbsp; GROW &nbsp;&bull;&nbsp; SUCCEED
+                    </div>
+                </main>
+
+                <footer>
+                    <div class="signature-block">
+                        <p class="date-text">{{issue_date}}</p>
+                        <div class="line"></div>
+                        <p class="label">Date</p>
+                    </div>
+
+                    <div class="seal-block">
+                        <img src="../shared/assets/codeinternx-seal.png" alt="Company Seal" class="ci-seal">
+                    </div>
+
+                    <div class="signature-block">
+                        <img src="../shared/assets/ceo-signature.png" alt="Signature" class="ci-signature">
+                        <div class="line"></div>
+                        <p class="label">{{signatory_name}}<br>Chief Executive Officer</p>
+                    </div>
+                </footer>
+                
+                <div class="meta-block">
+                    <p>Certificate ID: {{certificate_id}}</p>
+                    <div class="qr-code">
+                        <img src="{{qr_code}}" alt="Verification QR" width="50" height="50">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../shared/document-utils.js"></script>
+</body>
+</html>

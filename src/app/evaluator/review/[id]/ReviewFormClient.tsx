@@ -12,7 +12,7 @@ import { Loader2, CheckCircle2, FileWarning } from "lucide-react";
 
 export function ReviewFormClient({ submissionId, existingEval }: { submissionId: string, existingEval?: any }) {
   const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState(existingEval?.overall_score || 85);
+  const [score, setScore] = useState(existingEval?.total_score || 85);
   const [status, setStatus] = useState(existingEval ? "APPROVED" : "APPROVED"); // Default to approved
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

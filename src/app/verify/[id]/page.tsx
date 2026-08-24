@@ -9,7 +9,9 @@ export const metadata = {
   description: "Verify the authenticity of a CodeInternX certificate.",
 };
 
-export default async function VerifyCertificatePage({ params }: { params: { id: string } }) {
+import { PrintTrigger } from "@/components/PrintTrigger";
+
+export default async function VerifyCertificatePage({ params, searchParams }: { params: { id: string }, searchParams: { print?: string } }) {
   const certId = params.id;
   const supabase = await createClient();
 
@@ -23,10 +25,10 @@ export default async function VerifyCertificatePage({ params }: { params: { id: 
   const issueDate = certificate ? new Date(certificate.issue_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30 pb-20">
-      
+    <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-indigo-500/30 pb-20 print:pb-0 print:bg-white">
+      {searchParams.print === 'true' && <PrintTrigger filename={`CodeInternX-Certificate-${certId}.pdf`} />}
       {/* Premium Dark Hero */}
-      <div className="bg-slate-950 pt-24 pb-32 px-4 relative overflow-hidden border-b border-slate-800">
+      <div className="bg-slate-950 pt-24 pb-32 px-4 relative overflow-hidden border-b border-slate-800 print:hidden">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
         
@@ -43,11 +45,11 @@ export default async function VerifyCertificatePage({ params }: { params: { id: 
         </div>
       </div>
 
-      <div className="container mx-auto max-w-3xl px-4 -mt-16 relative z-20">
-        <div className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-forwards">
+      <div className="container mx-auto max-w-3xl px-4 -mt-16 relative z-20 print:mt-10">
+        <div id="certificate-container" className="mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-forwards print:animate-none">
           {isVerified ? (
-            <div className="bg-white border border-emerald-200 rounded-3xl shadow-lg shadow-emerald-100/50 overflow-hidden">
-              <div className="bg-emerald-500 h-2 w-full" />
+            <div className="bg-white border border-emerald-200 rounded-3xl shadow-lg shadow-emerald-100/50 overflow-hidden print:border-none print:shadow-none">
+              <div className="bg-emerald-500 h-2 w-full print:hidden" />
               <div className="p-8 md:p-10 bg-emerald-50/30 border-b border-emerald-100">
                 <div className="flex items-center gap-4 mb-3">
                   <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -111,7 +113,7 @@ export default async function VerifyCertificatePage({ params }: { params: { id: 
             </div>
           )}
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center print:hidden">
             <Button render={<Link href="/verify" />} variant="outline" className="h-[50px] px-8 rounded-xl bg-white hover:bg-slate-50 text-base shadow-sm">
               Verify Another Credential
             </Button>

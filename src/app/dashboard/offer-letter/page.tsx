@@ -1,8 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { AlertCircle, Calendar } from "lucide-react";
+import { AlertCircle, Calendar, CheckCircle2 } from "lucide-react";
 import { PrintButton } from "../PrintButton";
 import Image from "next/image";
+import { AcceptOfferButton } from "./AcceptOfferButton";
 
 export const metadata = {
   title: "Offer Letter | Dashboard | CodeInternX",
@@ -19,7 +20,7 @@ export default async function OfferLetterPage() {
   // Fetch enrollment and profile
   const { data: enrollment } = await supabase
     .from("enrollments")
-    .select("*, programs(title), profiles(full_name, email)")
+    .select("*, programs(title), profiles(full_name, email), applications(status)")
     .eq("student_id", user.id)
     .order("enrolled_at", { ascending: false })
     .limit(1)
@@ -52,11 +53,11 @@ export default async function OfferLetterPage() {
           <h1 className="text-3xl font-bold tracking-tight">Offer Letter</h1>
           <p className="text-muted-foreground mt-1">Official CodeInternX offer of internship.</p>
         </div>
-        <PrintButton className="w-full sm:w-auto" />
+        <PrintButton className="w-full sm:w-auto" targetId="document-container" filename={`Offer_Letter_${studentName.replace(/\s+/g, '_')}.pdf`} />
       </div>
 
       {/* Printable Document Container */}
-      <div className="bg-white border rounded-xl shadow-sm overflow-hidden print:border-none print:shadow-none print:m-0 print:p-0">
+      <div id="document-container" className="bg-white border rounded-xl shadow-sm overflow-hidden print:border-none print:shadow-none print:m-0 print:p-0">
         <div className="p-8 sm:p-12 md:p-16 max-w-4xl mx-auto print:max-w-none print:w-full print:p-8">
           
           {/* Document Header */}
@@ -121,6 +122,18 @@ export default async function OfferLetterPage() {
 
           </div>
         </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="print:hidden flex justify-end mt-8 border-t pt-6">
+        {enrollment.applications?.status === 'APPROVED' ? (
+          <AcceptOfferButton applicationId={enrollment.application_id} />
+        ) : (
+          <div className="inline-flex items-center gap-2 text-green-700 bg-green-50 px-6 py-3 rounded-md font-medium border border-green-200">
+            <CheckCircle2 className="w-5 h-5" />
+            Offer Accepted
+          </div>
+        )}
       </div>
     </div>
   );

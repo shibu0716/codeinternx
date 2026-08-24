@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Performance Report</title>
+    <link rel="stylesheet" href="../shared/brand.css">
+    <link rel="stylesheet" href="performance-report.css">
+</head>
+<body class="document-page">
+    <div class="header-band bg-navy"></div>
+    
+    <div class="page-content">
+        <header>
+            <img src="../shared/assets/codeinternx-logo.png" alt="CodeInternX" class="ci-logo">
+            <h1 class="document-title font-heading text-navy text-center">PERFORMANCE REPORT</h1>
+        </header>
+
+        <main>
+            <div class="intern-info-card">
+                <h3 class="card-title bg-blue text-white">Intern Information</h3>
+                <div class="card-grid">
+                    <div><strong>Name:</strong> <span class="auto-scale">{{intern_name}}</span></div>
+                    <div><strong>Intern ID:</strong> {{intern_id}}</div>
+                    <div><strong>Role:</strong> {{program_role}}</div>
+                    <div><strong>Department:</strong> {{department}}</div>
+                    <div><strong>Duration:</strong> {{internship_duration}}</div>
+                    <div><strong>Manager:</strong> {{reporting_manager}}</div>
+                </div>
+            </div>
+
+            <div class="overall-performance-section">
+                <div class="overall-circle-container">
+                    <svg class="rating-circle" viewBox="0 0 100 100">
+                        <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="circle-progress" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="rating-text">
+                        <span id="overall-rating-value" class="text-navy font-bold">{{overall_rating}}</span><span class="out-of">/5</span>
+                        <div id="overall-rating-percentage" class="percentage-text text-blue font-bold"></div>
+                    </div>
+                </div>
+                <div class="rating-scale">
+                    <p><strong>Scale:</strong> 1 (Poor) - 5 (Excellent)</p>
+                </div>
+            </div>
+
+            <h3 class="section-title text-navy font-heading">Performance Evaluation</h3>
+            <table class="eval-table">
+                <thead>
+                    <tr>
+                        <th>Criteria</th>
+                        <th>Rating</th>
+                        <th>Manager's Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Technical Skills</td>
+                        <td class="text-center font-bold">{{technical_skills_rating}}</td>
+                        <td>{{technical_skills_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Quality of Work</td>
+                        <td class="text-center font-bold">{{quality_of_work_rating}}</td>
+                        <td>{{quality_of_work_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Timeliness</td>
+                        <td class="text-center font-bold">{{timeliness_rating}}</td>
+                        <td>{{timeliness_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Teamwork</td>
+                        <td class="text-center font-bold">{{teamwork_rating}}</td>
+                        <td>{{teamwork_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Communication</td>
+                        <td class="text-center font-bold">{{communication_rating}}</td>
+                        <td>{{communication_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Initiative & Learning</td>
+                        <td class="text-center font-bold">{{initiative_learning_rating}}</td>
+                        <td>{{initiative_learning_comment}}</td>
+                    </tr>
+                    <tr>
+                        <td>Professionalism</td>
+                        <td class="text-center font-bold">{{professionalism_rating}}</td>
+                        <td>{{professionalism_comment}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="feedback-section">
+                <div class="feedback-box">
+                    <h4 class="text-navy">Key Strengths</h4>
+                    <ul>
+                        <li>{{strength_1}}</li>
+                        <li>{{strength_2}}</li>
+                        <li>{{strength_3}}</li>
+                    </ul>
+                </div>
+                <div class="feedback-box">
+                    <h4 class="text-navy">Areas for Improvement</h4>
+                    <ul>
+                        <li>{{improvement_1}}</li>
+                        <li>{{improvement_2}}</li>
+                        <li>{{improvement_3}}</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="manager-comments">
+                <h4 class="text-navy">Additional Comments</h4>
+                <p>{{manager_comments}}</p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-meta">
+                <p><strong>Date:</strong> {{issue_date}}</p>
+                <p><strong>Ref ID:</strong> {{performance_report_id}}</p>
+            </div>
+            <div class="signature-section">
+                <div class="seal-container">
+                    <img src="../shared/assets/codeinternx-seal.png" alt="Company Seal" class="ci-seal">
+                </div>
+                <div class="sign-container">
+                    <img src="../shared/assets/ceo-signature.png" alt="Signature" class="ci-signature">
+                    <p class="font-bold text-navy">{{signatory_name}}</p>
+                    <p class="text-gray-500">Chief Executive Officer</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../shared/document-utils.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/* Letter of Recommendation Specific Styles */
+
+.document-page {
+    padding: 3rem;
+    position: relative;
+}
+
+.page-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* Decorators */
+.decor {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    z-index: 0;
+}
+
+.top-left {
+    top: 0;
+    left: 0;
+    border-top: 10px solid var(--ci-blue);
+    border-left: 10px solid var(--ci-navy);
+}
+
+.bottom-right {
+    bottom: 0;
+    right: 0;
+    border-bottom: 10px solid var(--ci-blue);
+    border-right: 10px solid var(--ci-navy);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+}
+
+.ci-logo {
+    max-width: 220px;
+}
+
+.company-details p {
+    margin: 0 0 0.2rem 0;
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+.document-title {
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    margin: 0 0 0.5rem 0;
+}
+
+.title-divider {
+    height: 3px;
+    width: 60px;
+    margin: 0 auto 2.5rem auto;
+}
+
+.meta-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.meta-info p {
+    margin: 0;
+}
+
+.content-body {
+    flex-grow: 1;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    text-align: justify;
+}
+
+.content-body p {
+    margin-bottom: 1rem;
+}
+
+footer {
+    margin-top: auto;
+    position: relative;
+    padding-top: 2rem;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.sign-container p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.qr-code {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}

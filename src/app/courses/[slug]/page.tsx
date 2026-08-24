@@ -4,66 +4,55 @@ import { ArrowLeft, PlayCircle, BookOpen, Clock, Award, Shield, CheckCircle2, Mo
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/server";
 
-export function generateStaticParams() {
-  return [
-    { slug: "system-design" },
-    { slug: "data-structures" },
-    { slug: "nextjs-masterclass" }
-  ];
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
+export async function generateStaticParams() {
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const { data: programs } = await supabase.from("programs").select("slug").eq("category", "COURSE");
+  
+  return (programs || []).map((program) => ({
+    slug: program.slug,
+  }));
 }
-
-const courseData: Record<string, any> = {
-  "system-design": {
-    title: "System Design for Interviews",
-    description: "Master the art of designing scalable, highly available systems. This course breaks down complex architectures into easy-to-understand concepts, preparing you to ace senior engineering interviews.",
-    badge: "Most Popular",
-    modules: [
-      { title: "Introduction to System Design", duration: "45 mins" },
-      { title: "Networking & Protocols", duration: "1.5 hours" },
-      { title: "Scaling & Load Balancing", duration: "2 hours" },
-      { title: "Database Sharding & Replication", duration: "2.5 hours" },
-      { title: "Caching Strategies", duration: "1 hour" },
-      { title: "Message Queues & Event-Driven Architecture", duration: "1.5 hours" },
-      { title: "Real-World Case Studies (Netflix, Uber)", duration: "3 hours" },
-    ]
-  },
-  "data-structures": {
-    title: "Data Structures & Algorithms in TypeScript",
-    description: "A deep dive into essential data structures and algorithms. Learn how to write highly optimized, type-safe code to solve complex computational problems.",
-    badge: "Essential",
-    modules: [
-      { title: "Big O Notation & Complexity", duration: "1 hour" },
-      { title: "Arrays & Strings", duration: "2 hours" },
-      { title: "Linked Lists (Singly & Doubly)", duration: "2.5 hours" },
-      { title: "Stacks & Queues", duration: "1.5 hours" },
-      { title: "Trees & Binary Search Trees", duration: "3 hours" },
-      { title: "Graphs & Traversal Algorithms", duration: "3.5 hours" },
-      { title: "Dynamic Programming Foundations", duration: "4 hours" },
-    ]
-  },
-  "nextjs-masterclass": {
-    title: "Next.js 16 Masterclass",
-    description: "Build enterprise-grade web applications using the latest Next.js features, React Server Components, and advanced state management techniques.",
-    badge: "New Release",
-    modules: [
-      { title: "App Router & Server Components", duration: "1.5 hours" },
-      { title: "Data Fetching & Caching", duration: "2 hours" },
-      { title: "Authentication with NextAuth", duration: "2.5 hours" },
-      { title: "Database Integration (Prisma & Drizzle)", duration: "3 hours" },
-      { title: "Advanced Middleware", duration: "1 hour" },
-      { title: "Performance Optimization & SEO", duration: "2 hours" },
-      { title: "Deploying on Vercel & AWS", duration: "1.5 hours" },
-    ]
-  }
-};
 
 export default async function CourseSlugPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const course = courseData[slug];
+  const supabase = await createClient();
+
+  const { data: course } = await supabase
+    .from("programs")
+    .select("*")
+    .eq("slug", slug)
+    .single();
 
   if (!course) {
     notFound();
+  }
+
+  // Fetch tasks to use as modules
+  const { data: tasks } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("program_id", course.id)
+    .order("week_number", { ascending: true });
+
+  const taskList = tasks || [];
+  
+  const modules = taskList.map((task) => ({
+    title: task.title,
+    duration: "Self-paced",
+  }));
+
+  // fallback modules if no tasks
+  if (modules.length === 0) {
+    for (let i = 1; i <= course.duration_weeks; i++) {
+      modules.push({ title: `Module ${i}`, duration: "Self-paced" });
+    }
   }
 
   return (
@@ -84,7 +73,7 @@ export default async function CourseSlugPage({ params }: { params: Promise<{ slu
             <div className="text-left">
               <Badge className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 uppercase tracking-widest text-xs px-4 py-1.5 font-semibold rounded-full mb-6 inline-flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                {course.badge}
+                {course.level} COURSE
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter mb-6 text-white leading-[1.1]">
                 {course.title}
@@ -128,7 +117,7 @@ export default async function CourseSlugPage({ params }: { params: Promise<{ slu
             </div>
             <div>
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Duration</p>
-              <p className="text-lg font-bold text-slate-900">12+ Hours</p>
+              <p className="text-lg font-bold text-slate-900">{course.duration_weeks} Weeks</p>
             </div>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
@@ -137,7 +126,7 @@ export default async function CourseSlugPage({ params }: { params: Promise<{ slu
             </div>
             <div>
               <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Content</p>
-              <p className="text-lg font-bold text-slate-900">{course.modules.length} Modules</p>
+              <p className="text-lg font-bold text-slate-900">{modules.length} Modules</p>
             </div>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
@@ -171,7 +160,7 @@ export default async function CourseSlugPage({ params }: { params: Promise<{ slu
                 <BookOpen className="w-5 h-5 text-indigo-600" /> Course Curriculum
               </h3>
               <div className="space-y-4">
-                {course.modules.map((module: any, index: number) => (
+                {modules.map((module, index: number) => (
                   <div key={index} className="group bg-slate-50 border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm group-hover:bg-indigo-100 group-hover:text-indigo-700 transition-colors">
@@ -207,7 +196,7 @@ export default async function CourseSlugPage({ params }: { params: Promise<{ slu
               </p>
               <div className="space-y-4">
                 <Button className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-700 shadow-md">
-                  Enroll for ₹4,999
+                  Enroll for ₹{course.price}
                 </Button>
                 <p className="text-xs text-center text-slate-500 flex items-center justify-center gap-1">
                   <Shield className="w-3 h-3" /> 30-Day Money-Back Guarantee

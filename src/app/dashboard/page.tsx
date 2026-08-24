@@ -28,6 +28,54 @@ export default async function DashboardPage() {
     .single();
 
   if (!enrollment) {
+    // Check for any application first
+    const { data: application } = await supabase
+      .from("applications")
+      .select("*, programs(title)")
+      .eq("student_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (application) {
+      if (application.status === 'REJECTED') {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600">
+              <AlertCircle className="w-10 h-10" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Application Status</h1>
+            <p className="text-muted-foreground max-w-md">
+              Unfortunately, your application for the <strong>{(application.programs as any)?.title || 'Internship'}</strong> was not accepted at this time.
+            </p>
+            <div className="flex gap-4 mt-4">
+               <Link href={`/dashboard/applications`}>
+                <Button variant="outline" size="lg">View Application Details</Button>
+              </Link>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
+            <Clock className="w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Application Under Review</h1>
+          <p className="text-muted-foreground max-w-md">
+            You have successfully applied for the <strong>{(application.programs as any)?.title || 'Internship'}</strong>. 
+            Our team is currently reviewing your application. You will receive an email notification once it is approved!
+          </p>
+          <div className="flex gap-4 mt-4">
+             <Link href={`/dashboard/applications`}>
+              <Button variant="outline" size="lg">View Application Details</Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
         <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
@@ -44,22 +92,7 @@ export default async function DashboardPage() {
     );
   }
 
-  if (enrollment.payment_status !== "SUCCESS") {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-          <Lock className="w-10 h-10 text-muted-foreground" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">Payment Required</h1>
-        <p className="text-muted-foreground max-w-md">
-          You have initiated enrollment for <strong>{enrollment.programs?.title}</strong>, but we haven't received your payment yet.
-        </p>
-        <Link href={`/internships/${enrollment.programs?.slug}`}>
-          <Button size="lg" className="mt-4">Complete Payment</Button>
-        </Link>
-      </div>
-    );
-  }
+  // We no longer block access if payment is pending because payment is collected post-internship.
 
   // 1. Fetch all tasks for the program
   const { data: allTasks } = await supabase

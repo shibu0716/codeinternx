@@ -11,7 +11,9 @@ export const metadata = {
   title: "Grade Submission | Evaluator | CodeInternX",
 };
 
-export default async function GradeSubmissionPage({ params }: { params: { id: string } }) {
+export default async function GradeSubmissionPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -25,9 +27,9 @@ export default async function GradeSubmissionPage({ params }: { params: { id: st
     .select(`
       *,
       profiles:student_id (full_name, email, avatar_url),
-      tasks (title, description, requirements, points, programs(title))
+      tasks (title, description, requirements, programs(title))
     `)
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!submission) {
@@ -104,7 +106,7 @@ export default async function GradeSubmissionPage({ params }: { params: { id: st
                   <CardTitle className="text-xl">{submission.tasks?.title}</CardTitle>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-slate-900">{submission.tasks?.points || 100}</div>
+                  <div className="text-2xl font-bold text-slate-900">100</div>
                   <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Max Points</div>
                 </div>
               </div>

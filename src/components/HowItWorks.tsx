@@ -242,7 +242,7 @@ export function HowItWorks() {
           </div>
 
           {/* Right: Holographic Display Pane */}
-          <div className="w-full lg:w-[55%] flex-1 relative min-h-[400px] lg:min-h-0 rounded-3xl border border-white/60 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-2xl backdrop-blur-2xl">
+          <div className="w-full lg:w-[55%] flex-1 relative min-h-[450px] lg:min-h-[550px] rounded-3xl border border-white/60 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-2xl backdrop-blur-2xl">
             
             {/* The active content layer */}
             {pipelinePhases.map((phase, index) => {

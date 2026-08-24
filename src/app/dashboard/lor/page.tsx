@@ -61,11 +61,11 @@ export default async function LORPage() {
           <h1 className="text-3xl font-bold tracking-tight">Letter of Recommendation</h1>
           <p className="text-muted-foreground mt-1">Your official CodeInternX LOR for future endeavors.</p>
         </div>
-        <PrintButton className="w-full sm:w-auto" />
+        <PrintButton className="w-full sm:w-auto" targetId="document-container" filename={`LOR_${studentName.replace(/\s+/g, '_')}.pdf`} />
       </div>
 
       {/* Printable Document Container */}
-      <div className="bg-white border rounded-xl shadow-sm overflow-hidden print:border-none print:shadow-none print:m-0 print:p-0">
+      <div id="document-container" className="bg-white border rounded-xl shadow-sm overflow-hidden print:border-none print:shadow-none print:m-0 print:p-0">
         <div className="p-8 sm:p-12 md:p-16 max-w-4xl mx-auto print:max-w-none print:w-full print:p-8">
           
           {/* Document Header */}

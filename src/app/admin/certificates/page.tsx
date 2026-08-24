@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink, Award } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 
 import { IssueCertificateModal } from "./IssueCertificateModal";
@@ -39,7 +40,7 @@ export default async function AdminCertificatesPage() {
         profiles ( full_name, email ),
         programs ( title )
       `)
-      .eq("is_completed", true)
+      
       // Fetch enrollments that are completed but don't have a certificate yet
   ]);
 
@@ -116,12 +117,16 @@ export default async function AdminCertificatesPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button size="icon" variant="ghost" title="View Public Verify Page">
-                            <ExternalLink className="w-4 h-4 text-slate-500" />
-                          </Button>
-                          <Button size="icon" variant="ghost" title="Download PDF">
-                            <Download className="w-4 h-4 text-blue-600" />
-                          </Button>
+                          <Link href={`/verify/certificate/${cert.certificate_id}`} target="_blank">
+                            <Button size="icon" variant="ghost" title="View Public Verify Page">
+                              <ExternalLink className="w-4 h-4 text-slate-500" />
+                            </Button>
+                          </Link>
+                          <Link href={`/verify/certificate/${cert.certificate_id}?print=true`} target="_blank">
+                            <Button size="icon" variant="ghost" title="Download PDF">
+                              <Download className="w-4 h-4 text-blue-600" />
+                            </Button>
+                          </Link>
                         </div>
                       </TableCell>
                     </TableRow>

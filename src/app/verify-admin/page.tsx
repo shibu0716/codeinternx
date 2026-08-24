@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, ArrowRight, ShieldCheck } from "lucide-react";
 import { verifyAdminOTP } from "@/actions/auth";
+import { ResendOTPButton } from "./ResendOTPButton";
 
 export const metadata = {
   title: "Admin Security Verification | CodeInternX",
@@ -63,8 +64,10 @@ export default async function VerifyAdminPage({ searchParams }: { searchParams: 
           </Button>
         </form>
         
-        <div className="mt-8 text-center">
-          <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+        <div className="mt-8 text-center flex flex-col items-center">
+          <ResendOTPButton />
+          
+          <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mt-6 block">
             Cancel and return to login
           </Link>
         </div>

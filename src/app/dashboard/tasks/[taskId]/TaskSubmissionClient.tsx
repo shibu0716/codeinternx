@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, MessageSquare, Loader2, AlertCircle } from "lucide-react";
+import { Globe, MessageSquare, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
+import { submitTask } from "@/actions/submissions";
 
-export function TaskSubmissionClient() {
+export function TaskSubmissionClient({ taskId, enrollmentId, initialStatus }: { taskId: string, enrollmentId: string, initialStatus: string }) {
   const [githubUrl, setGithubUrl] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isApproved = initialStatus === 'APPROVED';
 
   const validateGithubUrl = (url: string) => {
     try {
@@ -41,15 +44,28 @@ export function TaskSubmissionClient() {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    const result = await submitTask(taskId, enrollmentId, githubUrl, liveUrl, notes);
+    
+    if (result.success) {
       toast.success("Task revision submitted successfully! Evaluator will review it shortly.");
-      setLoading(false);
       setGithubUrl("");
       setLiveUrl("");
       setNotes("");
-    }, 1500);
+    } else {
+      setError(result.error || "Failed to submit task.");
+    }
+    
+    setLoading(false);
   };
+
+  if (isApproved) {
+    return (
+      <div className="p-4 bg-green-50 border border-green-200 rounded-md text-green-800 text-sm">
+        <CheckCircle2 className="w-5 h-5 inline-block mr-2" />
+        This task has been approved. You cannot submit further revisions.
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

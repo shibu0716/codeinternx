@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Letter of Recommendation</title>
+    <link rel="stylesheet" href="../shared/brand.css">
+    <link rel="stylesheet" href="lor.css">
+</head>
+<body class="document-page">
+    <!-- Geometric Decorators (Similar to Offer Letter) -->
+    <div class="decor top-left"></div>
+    <div class="decor bottom-right"></div>
+
+    <div class="page-content">
+        <header>
+            <div class="logo-container">
+                <img src="../shared/assets/codeinternx-logo.png" alt="CodeInternX" class="ci-logo">
+            </div>
+            <div class="company-details text-gray-500">
+                <p>www.codeinternx.com</p>
+                <p>contact@codeinternx.com</p>
+                <p>Bengaluru, India</p>
+            </div>
+        </header>
+
+        <main>
+            <h1 class="document-title font-heading text-navy text-center">LETTER OF RECOMMENDATION</h1>
+            <div class="title-divider bg-blue"></div>
+
+            <div class="meta-info">
+                <p><strong>Date:</strong> {{issue_date}}</p>
+                <p><strong>Ref ID:</strong> {{lor_id}}</p>
+            </div>
+
+            <section class="content-body">
+                <p><strong>TO WHOM IT MAY CONCERN</strong></p>
+                <br>
+                <p>It is my distinct pleasure to highly recommend <strong><span class="auto-scale">{{student_name}}</span></strong>.</p>
+                
+                <p>{{student_name}} successfully completed an internship program with CodeInternX from <strong>{{start_date}}</strong> to <strong>{{end_date}}</strong>.</p>
+                
+                <p>During their tenure with us, {{student_name}} demonstrated exceptional dedication, a strong willingness to learn, and the ability to grasp complex concepts quickly. They consistently delivered high-quality work and were a valuable asset to our team.</p>
+
+                <p>In addition to their technical proficiency, {{student_name}} showed excellent teamwork and communication skills. They actively participated in team discussions and were always ready to take on new challenges with a positive attitude.</p>
+
+                <p>I have no doubt that {{student_name}} will be a tremendous addition to any organization or academic institution they choose to join. I strongly endorse their application and wish them the very best in all their future endeavors.</p>
+                
+                <p>Please feel free to contact us should you require any further information regarding their performance.</p>
+                <br>
+                <p>Sincerely,</p>
+            </section>
+        </main>
+
+        <footer>
+            <div class="signature-section">
+                <div class="sign-container">
+                    <img src="../shared/assets/ceo-signature.png" alt="Signature" class="ci-signature">
+                    <p class="font-bold text-navy">{{signatory_name}}</p>
+                    <p class="text-gray-500">Chief Executive Officer</p>
+                    <p class="text-gray-500">CodeInternX</p>
+                </div>
+                <div class="seal-container">
+                    <img src="../shared/assets/codeinternx-seal.png" alt="Company Seal" class="ci-seal">
+                </div>
+            </div>
+            <!-- Verification QR -->
+            <div class="qr-code">
+                <img src="{{qr_code}}" alt="Verification QR" width="60" height="60">
+            </div>
+        </footer>
+    </div>
+    
+    <script src="../shared/document-utils.js"></script>
+</body>
+</html>

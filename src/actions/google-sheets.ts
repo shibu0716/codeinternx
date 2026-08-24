@@ -41,7 +41,7 @@ export async function syncGoogleSheets() {
     let imported = 0;
     let skipped = 0;
     let errors = 0;
-    let errorDetails: string[] = [];
+    const errorDetails: string[] = [];
 
     const { data: programs } = await supabase.from("programs").select("id, title");
 

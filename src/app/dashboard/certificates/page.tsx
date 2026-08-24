@@ -28,9 +28,9 @@ export default async function CertificatesPage() {
 
     const { data: apps } = await supabase
       .from("applications")
-      .select("*, programs(title)")
+      .select("*, programs(title), enrollments(*)")
       .eq("student_id", user.id)
-      .in("status", ["ENROLLED", "IN_PROGRESS"]);
+      .in("status", ["ENROLLED", "IN_PROGRESS", "COMPLETED"]);
       
     inProgressApps = apps || [];
   }
@@ -63,7 +63,7 @@ export default async function CertificatesPage() {
                   </div>
                   <div className="flex justify-center mt-4">
                     <div className="bg-white p-2 rounded-xl shadow-sm border">
-                      <QRCodeSVG value={`https://codeinternx.com/verify/${cert.certificate_id}`} size={100} />
+                      <QRCodeSVG value={`${process.env.NEXT_PUBLIC_APP_URL || 'https://codeinternx.com'}/verify/certificate/${cert.certificate_id}`} size={100} />
                     </div>
                   </div>
                 </div>
@@ -73,10 +73,12 @@ export default async function CertificatesPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-wrap gap-3 pt-0">
-              <Button className="flex-1" variant="default" disabled>
-                <Download className="w-4 h-4 mr-2" /> Download PDF
-              </Button>
-              <Link href={`/verify/${cert.certificate_id}`} target="_blank" className="flex-1 flex">
+              <Link href={`/verify/certificate/${cert.certificate_id}?print=true`} target="_blank" className="flex-1 flex">
+                <Button className="w-full" variant="default">
+                  <Download className="w-4 h-4 mr-2" /> Download PDF
+                </Button>
+              </Link>
+              <Link href={`/verify/certificate/${cert.certificate_id}`} target="_blank" className="flex-1 flex">
                 <Button className="w-full" variant="outline">
                   <ExternalLink className="w-4 h-4 mr-2" /> Verify Page
                 </Button>
@@ -85,29 +87,46 @@ export default async function CertificatesPage() {
           </Card>
         ))}
 
-        {inProgressApps.map(app => (
-          <Card key={app.id} className="border-dashed bg-muted/20 opacity-70 flex flex-col">
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1">
-                  <CardTitle className="text-xl">{app.programs?.title}</CardTitle>
-                  <CardDescription>Program In Progress</CardDescription>
+        {inProgressApps.map(app => {
+          const isCompleted = app.status === 'COMPLETED';
+          const enrollment = app.enrollments?.[0];
+          const isPaymentPending = isCompleted && enrollment?.payment_status !== 'SUCCESS' && enrollment?.payment_status !== 'PAID';
+          
+          return (
+            <Card key={app.id} className={`flex flex-col ${isPaymentPending ? 'border-amber-200 bg-amber-50/30' : 'border-dashed bg-muted/20 opacity-70'}`}>
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl">{app.programs?.title}</CardTitle>
+                    <CardDescription>{isCompleted ? 'Internship Completed' : 'Program In Progress'}</CardDescription>
+                  </div>
+                  <Award className={`w-8 h-8 ${isPaymentPending ? 'text-amber-500' : 'text-muted-foreground'}`} />
                 </div>
-                <Award className="w-8 h-8 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-2 flex-1">
-              <p className="text-sm text-muted-foreground">
-                Complete all mandatory tasks and the final project with an average score above 60% to unlock this certificate.
-              </p>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button className="w-full" variant="secondary" disabled>
-                Certificate Locked
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="pt-2 flex-1">
+                <p className={`text-sm ${isPaymentPending ? 'text-amber-800' : 'text-muted-foreground'}`}>
+                  {isPaymentPending 
+                    ? "Congratulations on completing your internship! Please complete your payment of ₹99 to instantly unlock your Certificate of Completion, Letter of Recommendation, and Performance Report."
+                    : "Complete all mandatory tasks and the final project with an average score above 60% to unlock this certificate."
+                  }
+                </p>
+              </CardContent>
+              <CardFooter className="pt-0">
+                {isPaymentPending ? (
+                  <Link href={`/payment?applicationId=${app.id}`} className="w-full">
+                    <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+                      Pay ₹99 to Unlock Documents
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button className="w-full" variant="secondary" disabled>
+                    Certificate Locked
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          );
+        })}
 
         {certificates.length === 0 && inProgressApps.length === 0 && (
           <div className="col-span-full py-10 text-center text-muted-foreground">

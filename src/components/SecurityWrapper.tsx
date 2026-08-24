@@ -40,7 +40,7 @@ export function SecurityWrapper({ children }: { children: React.ReactNode }) {
     // Advanced DevTools detection (optional trick to pause debugger if they somehow open it)
     const blockDevTools = setInterval(() => {
       const before = new Date().getTime();
-      // eslint-disable-next-line no-debugger
+       
       debugger;
       const after = new Date().getTime();
       if (after - before > 100) {

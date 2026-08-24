@@ -89,28 +89,29 @@ export default async function StudentApplicationsPage() {
                   {app.status === 'PENDING' || app.status === 'UNDER_REVIEW' ? (
                     <p className="text-slate-600">Your application is currently being reviewed by our admissions team. We usually respond within 24-48 hours.</p>
                   ) : app.status === 'APPROVED' ? (
-                    <p className="text-slate-900 font-medium">Congratulations! Your application has been approved. Please complete your enrollment by submitting the program fee.</p>
+                    <p className="text-slate-900 font-medium">Congratulations! Your application has been approved. Please view your Offer Letter.</p>
                   ) : app.status === 'REJECTED' ? (
                     <p className="text-slate-600">Unfortunately, we could not proceed with your application at this time. We encourage you to apply again in the next cohort.</p>
                   ) : (
-                    <p className="text-slate-600">You are fully enrolled in this program. Check your dashboard for tasks and progress.</p>
+                    <p className="text-slate-600">You are fully enrolled in this program. View your Offer Letter and check your dashboard for tasks and progress.</p>
                   )}
                 </div>
               </CardContent>
               
               <CardFooter className="pt-4 border-t">
-                {app.status === 'APPROVED' ? (
-                  <Link href={`/payment?applicationId=${app.id}`} className="w-full">
-                    <Button className="w-full bg-slate-900 text-white hover:bg-slate-800">
-                      Proceed to Payment
-                    </Button>
-                  </Link>
-                ) : app.status === 'PAID' || app.status === 'ENROLLED' ? (
-                  <Link href={`/dashboard/internships`} className="w-full">
-                    <Button className="w-full" variant="outline">
-                      Go to Internships
-                    </Button>
-                  </Link>
+                {app.status === 'APPROVED' || app.status === 'PAID' || app.status === 'ENROLLED' || app.status === 'IN_PROGRESS' ? (
+                  <div className="flex gap-2 w-full">
+                    <Link href={`/dashboard/offer-letter`} className="w-1/2">
+                      <Button className="w-full bg-slate-900 text-white hover:bg-slate-800">
+                        Offer Letter
+                      </Button>
+                    </Link>
+                    <Link href={`/dashboard/internships`} className="w-1/2">
+                      <Button className="w-full" variant="outline">
+                        View Tasks
+                      </Button>
+                    </Link>
+                  </div>
                 ) : null}
               </CardFooter>
             </Card>

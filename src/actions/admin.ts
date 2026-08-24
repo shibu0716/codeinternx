@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { internships } from "@/lib/data";
 
 export async function issueOfferLetter(applicationId: string) {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export async function issueOfferLetter(applicationId: string) {
   // 2. Fetch the application
   const { data: app, error: appError } = await supabase
     .from("applications")
-    .select("*")
+    .select("*, profiles(email, full_name), programs(title, duration_months)")
     .eq("id", applicationId)
     .single();
 
@@ -32,33 +33,101 @@ export async function issueOfferLetter(applicationId: string) {
   }
 
   // 3. Create the enrollment
-  const { error: enrollError } = await supabase
+  const { data: enrollment, error: enrollError } = await supabase
     .from("enrollments")
     .insert({
       student_id: app.student_id,
-      program_id: app.internship_id,
+      program_id: app.program_id,
       application_id: app.id,
-      payment_status: "PAID",
+      payment_status: "PENDING",
       enrolled_at: new Date().toISOString()
-    });
+    })
+    .select("id")
+    .single();
 
   if (enrollError) {
-    throw new Error(`Failed to create enrollment: ${enrollError.message}`);
+    // Check if already enrolled (idempotent)
+    if (!enrollError.message.includes('duplicate') && !enrollError.message.includes('unique')) {
+      throw new Error(`Failed to create enrollment: ${enrollError.message}`);
+    }
   }
 
-  // 4. Update the application status to ENROLLED
+  // 4. Update application status
   const { error: updateError } = await supabase
     .from("applications")
-    .update({ status: "ENROLLED" })
+    .update({ status: "APPROVED" })
     .eq("id", applicationId);
 
   if (updateError) {
     throw new Error("Failed to update application status");
   }
 
+  // 5. Generate sequential Offer Letter ID
+  const year = new Date().getFullYear();
+  const { count } = await supabase
+    .from("internship_documents")
+    .select("*", { count: 'exact', head: true })
+    .eq("type", "OFFER_LETTER")
+    .ilike("document_id", `OL-${year}-%`);
+
+  const nextNum = (count || 0) + 1;
+  const documentId = `OL-${year}-${nextNum.toString().padStart(6, '0')}`;
+
+  // Get enrollment id (existing or newly created)
+  const enrollmentId = enrollment?.id || (await supabase
+    .from("enrollments")
+    .select("id")
+    .eq("application_id", applicationId)
+    .single()
+    .then(r => r.data?.id));
+
+  // 6. Generate PDF + save to DB + send email with attachment
+  const startDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+  const durationMonths = app.programs?.duration_months || 1;
+  const endDate = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000)
+    .toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  if (enrollmentId) {
+    try {
+      const { generateAndSaveDocument } = await import("@/actions/documents");
+      const result = await generateAndSaveDocument({
+        type: 'OFFER_LETTER',
+        studentId: app.student_id,
+        enrollmentId,
+        documentId,
+        studentEmail: app.profiles?.email,
+        studentName: app.profiles?.full_name || 'Student',
+        programTitle: app.programs?.title || 'Internship Program',
+        data: {
+          student_name: app.profiles?.full_name || 'Student',
+          position: app.programs?.title || 'Intern',
+          department: 'Engineering',
+          work_mode: 'Remote',
+          start_date: startDate,
+          end_date: endDate,
+          responsibilities: 'Complete assigned tasks and projects as outlined by your mentor.',
+          offer_letter_id: documentId,
+          issue_date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }),
+          signatory_name: 'CodeInternX Director',
+        },
+      });
+      if (!result.success && result.isPdfFailure) {
+        console.error('[issueOfferLetter] PDF generation failed — offer letter not stored');
+      }
+    } catch (docErr) {
+      console.error('[issueOfferLetter] Document generation error:', docErr);
+      // Enrollment and application status are already set — fall back to plain email
+      try {
+        const { sendOfferLetterEmail } = await import("@/lib/email");
+        await sendOfferLetterEmail(app.profiles?.email || '', app.profiles?.full_name || 'Student', app.programs?.title || 'Internship Program');
+      } catch {}
+    }
+  }
+
   revalidatePath("/admin/applications");
   return { success: true };
 }
+
 
 export async function issueCertificate(studentId: string, programId: string, enrollmentId: string) {
   const supabase = await createClient();
@@ -77,6 +146,15 @@ export async function issueCertificate(studentId: string, programId: string, enr
     throw new Error("Unauthorized");
   }
 
+  // 2. Fetch necessary data (include email for PDF email delivery)
+  const { data: enrollment, error: enrollmentError } = await supabase
+    .from('enrollments')
+    .select('*, profiles(full_name, email), programs(title)')
+    .eq('id', enrollmentId)
+    .single();
+    
+  if (enrollmentError || !enrollment) throw new Error("Enrollment not found");
+
   // Generate unique certificate ID
   const year = new Date().getFullYear();
   const { count } = await supabase
@@ -86,9 +164,44 @@ export async function issueCertificate(studentId: string, programId: string, enr
     
   const nextNum = (count || 0) + 1;
   const paddedNum = nextNum.toString().padStart(6, '0');
-  let certId = `CIX-${year}-${paddedNum}`;
+  const certId = `CIX-${year}-${paddedNum}`;
 
-  // 2. Insert Certificate
+  const issueDate = new Date();
+  
+  // Prepare dynamic template data
+  // Note: generateCertificatePDF must be imported at the top of admin.ts
+  const certData = {
+    studentName: enrollment.profiles.full_name || 'Unknown Student',
+    internshipDomain: enrollment.programs.title || 'Internship Program',
+    companyName: 'CodeInternX',
+    startDate: new Date(enrollment.enrolled_at).toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' }),
+    endDate: new Date(issueDate).toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' }),
+    issueDate: issueDate.toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' }),
+    certificateId: certId,
+    signatoryName: 'CodeInternX Director'
+  };
+
+  // Generate PDF buffer
+  const { generateCertificatePDF } = await import('@/lib/pdfGenerator');
+  const pdfBuffer = await generateCertificatePDF(certData);
+
+  // Upload to Supabase Storage
+  const filename = `${certId}.pdf`;
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('certificates')
+    .upload(filename, pdfBuffer, {
+      contentType: 'application/pdf',
+      upsert: true
+    });
+    
+  if (uploadError) {
+    throw new Error(`Failed to upload PDF: ${uploadError.message}`);
+  }
+  
+  const { data: publicUrlData } = supabase.storage.from('certificates').getPublicUrl(filename);
+  const certificateUrl = publicUrlData.publicUrl;
+
+  // Insert Certificate Record
   const { error } = await supabase
     .from("certificates")
     .insert({
@@ -96,7 +209,7 @@ export async function issueCertificate(studentId: string, programId: string, enr
       student_id: studentId,
       program_id: programId,
       enrollment_id: enrollmentId,
-      issue_date: new Date().toISOString()
+      issue_date: issueDate.toISOString().split('T')[0]
     });
 
   if (error) {
@@ -109,8 +222,32 @@ export async function issueCertificate(studentId: string, programId: string, enr
   // Update enrollment to is_completed
   await supabase
     .from("enrollments")
-    .update({ is_completed: true, completed_at: new Date().toISOString() })
+    .update({ is_completed: true, completed_at: issueDate.toISOString() })
     .eq("id", enrollmentId);
+
+  // Send certificate PDF email — best-effort
+  const studentEmail = enrollment.profiles?.email;
+  const studentName = enrollment.profiles?.full_name || 'Student';
+  const programTitle = enrollment.programs?.title || 'Internship Program';
+
+  if (studentEmail) {
+    try {
+      const { sendDocumentEmail } = await import('@/lib/email');
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://codeinternx.com';
+      await sendDocumentEmail({
+        documentType: 'CERTIFICATE',
+        documentId: certId,
+        studentId,
+        studentName,
+        programTitle,
+        recipientEmail: studentEmail,
+        pdfBuffer,
+        viewOnlineUrl: `${appUrl}/verify/certificate/${certId}`,
+      });
+    } catch (emailErr) {
+      console.error('[issueCertificate] Email delivery failed (certificate still issued):', emailErr);
+    }
+  }
 
   revalidatePath("/admin/certificates");
   return { success: true, certificateId: certId };
@@ -179,9 +316,10 @@ export async function bulkIssueCertificates(enrollmentsToIssue: { studentId: str
 }
 
 export async function initiateRefund(paymentId: string) {
+  // Manual payment system: Refunds are handled offline.
+  // This function marks the payment as REFUNDED in the database for record-keeping.
   const supabase = await createClient();
 
-  // 1. Verify admin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
@@ -195,7 +333,6 @@ export async function initiateRefund(paymentId: string) {
     throw new Error("Only SUPER_ADMIN can initiate refunds");
   }
 
-  // 2. Fetch Payment
   const { data: payment, error: payError } = await supabase
     .from("payments")
     .select("*")
@@ -210,30 +347,77 @@ export async function initiateRefund(paymentId: string) {
     throw new Error("Payment is already refunded");
   }
 
-  // NOTE: In a real production system, we would integrate the Razorpay Node SDK here:
-  // const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_SECRET });
-  // await instance.payments.refund(payment.razorpay_payment_id, { amount: payment.amount * 100 });
-  // For now, we simulate the refund by updating the database.
-
-  // 3. Update Payment Status
   const { error: updateError } = await supabase
     .from("payments")
-    .update({ status: "REFUNDED" })
+    .update({ status: "REFUNDED", reviewed_at: new Date().toISOString(), reviewed_by: user.id })
     .eq("id", paymentId);
 
   if (updateError) {
     throw new Error("Failed to update payment status");
   }
 
-  // Update Order Status too
-  if (payment.order_id) {
-    await supabase
-      .from("orders")
-      .update({ status: "REFUNDED" })
-      .eq("id", payment.order_id);
+  revalidatePath("/admin/payments");
+  return { success: true };
+}
+
+export async function updateApplicationStatus(applicationId: string, newStatus: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
   }
 
-  revalidatePath("/admin/payments");
+  const allowedStatuses = ["REJECTED", "PENDING", "UNDER_REVIEW"];
+  if (!allowedStatuses.includes(newStatus)) {
+    throw new Error("Invalid status transition");
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ status: newStatus })
+    .eq("id", applicationId);
+
+  if (error) {
+    throw new Error(`Failed to update application: ${error.message}`);
+  }
+
+  revalidatePath("/admin/applications");
+  return { success: true };
+}
+
+export async function markApplicationCompleted(applicationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ status: "COMPLETED" })
+    .eq("id", applicationId);
+
+  if (error) {
+    throw new Error(`Failed to mark application as completed: ${error.message}`);
+  }
+
+  revalidatePath("/admin/applications");
   return { success: true };
 }
 
@@ -468,33 +652,17 @@ export async function performGlobalSearch(query: string) {
     }));
   }
 
-  // Search Orders
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("id, razorpay_order_id, amount")
-    .ilike("razorpay_order_id", safeQuery)
-    .limit(3);
-
-  if (orders) {
-    orders.forEach(o => results.push({
-      type: 'ORDER',
-      title: o.razorpay_order_id,
-      subtitle: `Amount: ₹${o.amount}`,
-      url: `/admin/orders`
-    }));
-  }
-
-  // Search Payments
+  // Search Payments by transaction ID
   const { data: payments } = await supabase
     .from("payments")
-    .select("id, razorpay_payment_id, amount")
-    .ilike("razorpay_payment_id", safeQuery)
+    .select("id, transaction_id, amount")
+    .ilike("transaction_id", safeQuery)
     .limit(3);
 
   if (payments) {
     payments.forEach(p => results.push({
       type: 'PAYMENT',
-      title: p.razorpay_payment_id,
+      title: p.transaction_id,
       subtitle: `Amount: ₹${p.amount}`,
       url: `/admin/payments`
     }));
@@ -517,4 +685,38 @@ export async function performGlobalSearch(query: string) {
   }
 
   return results;
+}
+
+export async function seedPrograms() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+  
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  // Insert programs ignoring duplicates if possible, or just insert them.
+  for (const prog of internships) {
+    // Check if it exists
+    const { data: existing } = await supabase.from("programs").select("id").eq("slug", prog.slug).single();
+    if (!existing) {
+      await supabase.from("programs").insert({
+        title: prog.title,
+        slug: prog.slug,
+        description: prog.description,
+        category: prog.category,
+        duration_weeks: 4, // Default duration
+        level: prog.level?.toUpperCase() || 'BEGINNER',
+        mode: prog.mode?.toUpperCase() || 'ONLINE',
+        technologies: prog.technologies,
+        price: 99.00, // Default price
+        is_published: prog.isPublished || true
+      });
+    }
+  }
+
+  revalidatePath("/admin/programs");
+  return { success: true };
 }

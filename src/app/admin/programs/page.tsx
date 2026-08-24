@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Edit, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
+import { SeedButton } from "./SeedButton";
 
 export const metadata = {
   title: "Manage Programs | CodeInternX Admin",
@@ -38,10 +39,13 @@ export default async function AdminProgramsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Manage Programs</h1>
           <p className="text-muted-foreground mt-1">Create, edit, and publish internships and courses.</p>
         </div>
-        <Link href="/admin/programs/new" className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Create Program
-        </Link>
+        <div className="flex gap-2">
+          <SeedButton />
+          <Link href="/admin/programs/new" className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2">
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Create Program
+          </Link>
+        </div>
       </div>
 
       <Card>

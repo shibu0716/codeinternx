@@ -1,84 +1,81 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, CreditCard, Download, ExternalLink, IndianRupee } from "lucide-react";
+import { CreditCard, IndianRupee } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { PaymentsTableClient } from "./PaymentsTableClient";
 
 export const metadata = {
-  title: "Payment Tracking | CodeInternX Admin",
+  title: "Payment Verification | CodeInternX Admin",
 };
 
 export default async function AdminPaymentsPage() {
   const supabase = await createClient();
 
-  // Fetch actual payments table
+  // Fetch payments with manual payment schema
   const { data: payments, error } = await supabase
     .from("payments")
     .select(`
       id,
-      razorpay_payment_id,
-      razorpay_order_id,
+      transaction_id,
       amount,
       currency,
       status,
       payment_method,
-      created_at,
+      proof_file_url,
+      submitted_at,
       profiles ( full_name, email )
     `)
-    .order("created_at", { ascending: false });
+    .order("submitted_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching payments:", error);
   }
 
-  const totalRevenue = payments?.filter(p => p.status === 'SUCCESS').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
-  const successfulPayments = payments?.filter(p => p.status === 'SUCCESS').length || 0;
-  const failedPayments = payments?.filter(p => p.status === 'FAILED').length || 0;
+  const pendingPayments = payments?.filter(p => p.status === 'PENDING_VERIFICATION').length || 0;
+  const verifiedPayments = payments?.filter(p => p.status === 'VERIFIED').length || 0;
+  const rejectedPayments = payments?.filter(p => p.status === 'REJECTED' || p.status === 'RESUBMISSION_REQUIRED').length || 0;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payment Tracking</h1>
-        <p className="text-muted-foreground mt-1">Monitor all completed, failed, and refunded transactions.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payment Verification</h1>
+        <p className="text-muted-foreground mt-1">Review student payment proofs and manually verify transactions.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+        <Card className="bg-gradient-to-br from-amber-600 to-amber-500 text-white shadow-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-slate-200 text-sm font-medium">Total Captured Revenue</CardTitle>
+            <CardTitle className="text-white text-sm font-medium">Pending Verification</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold flex items-center">
-              <IndianRupee className="w-6 h-6 mr-1 opacity-80" /> {totalRevenue.toLocaleString('en-IN')}
+              {pendingPayments}
             </div>
-            <p className="text-xs text-green-400 mt-2">Based on successful payments</p>
+            <p className="text-xs text-amber-100 mt-2">Requires admin action</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-green-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Successful Payments</CardTitle>
+            <CardTitle className="text-green-700 text-sm font-medium">Verified Payments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{successfulPayments}</div>
+            <div className="text-3xl font-bold text-green-700">{verifiedPayments}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-red-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Failed Payments</CardTitle>
+            <CardTitle className="text-red-700 text-sm font-medium">Rejected / Resubmissions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-500">{failedPayments}</div>
-            <p className="text-xs text-muted-foreground mt-2">Requires follow-up</p>
+            <div className="text-3xl font-bold text-red-600">{rejectedPayments}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="shadow-sm border-slate-200">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>Submitted Payments</CardTitle>
+          <CardDescription>Click to view proof and verify payment.</CardDescription>
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
           <PaymentsTableClient payments={payments || []} />

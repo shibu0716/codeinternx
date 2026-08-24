@@ -43,8 +43,18 @@ export async function submitTask(taskId: string, formData: FormData) {
 export async function evaluateTask(submissionId: string, score: number, feedback: string, newStatus: string) {
   const supabase = await createClient();
   
-  // Verify admin access in a real app
-  // ...
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "SUPER_ADMIN" && profile?.role !== "ADMIN" && profile?.role !== "EVALUATOR") {
+    throw new Error("Unauthorized: Only Admins or Evaluators can evaluate tasks.");
+  }
   
   const { error } = await supabase
     .from("evaluations")
